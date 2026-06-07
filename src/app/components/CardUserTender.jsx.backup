@@ -1,0 +1,98 @@
+'use client'
+import Link from "next/link";
+import { useRouter } from "next/navigation";
+import TenderInvitationsPanel from "./TenderInvitationsPanel";
+import { useState } from "react";
+
+
+function CardUserTender({item}) {
+    
+    const totalProposal = item.proposals.length;
+   const id = item.id
+   const router = useRouter()
+   const [showInvitations, setShowInvitations] = useState(false);
+  return (
+    <div className="bg-white dark:bg-boxdark rounded-lg shadow-sm border border-gray-200 dark:border-strokedark overflow-hidden hover:shadow-md transition-shadow duration-200 w-full mb-4 text-sm">
+      <div className="flex flex-col lg:flex-row gap-6">
+        <div className="flex-1">
+          <h5 className="mb-2 text-xl font-semibold leading-tight text-gray-900 dark:text-white">
+            {item.title}
+          </h5>
+          <div className="w-full mb-3 flex justify-start gap-3">
+            {item.subcategories?.map((sub, index) => (
+              <span key={index} className="inline-block whitespace-nowrap rounded-full bg-gray-100 dark:bg-meta-4 py-1 px-2   text-center align-baseline text-[0.70em] font-bold leading-none text-gray-700 dark:text-white">
+                {sub.name}
+              </span>
+            ))}
+          </div>
+
+          <div className="flex flex-col sm:flex-row gap-3 mt-4">
+            <button
+              type="button"
+              className="flex-1 rounded-lg bg-[#191654] px-4 py-2.5 text-sm font-medium  leading-normal text-white shadow-sm hover:shadow-md hover:shadow-[0_8px_9px_-4px_rgba(59,113,202,0.3),0_4px_18px_0_rgba(59,113,202,0.2)]  focus:shadow-[0_8px_9px_-4px_rgba(59,113,202,0.3),0_4px_18px_0_rgba(59,113,202,0.2)] focus:outline-none focus:ring-0 active:bg-[#141240] active:shadow-[0_8px_9px_-4px_rgba(59,113,202,0.3),0_4px_18px_0_rgba(59,113,202,0.2)] dark:shadow-[0_4px_9px_-4px_rgba(59,113,202,0.5)] dark:hover:shadow-[0_8px_9px_-4px_rgba(59,113,202,0.2),0_4px_18px_0_rgba(59,113,202,0.1)] dark:focus:shadow-[0_8px_9px_-4px_rgba(59,113,202,0.2),0_4px_18px_0_rgba(59,113,202,0.1)] dark:active:shadow-[0_8px_9px_-4px_rgba(59,113,202,0.2),0_4px_18px_0_rgba(59,113,202,0.1)]"
+              data-te-ripple-init
+              data-te-ripple-color="light"
+              onClick={() => router.push(`/tenders/${item.id}`)}
+            >
+              Ver Licitación
+            </button>
+            
+            <button
+              type="button"
+              className="flex-1 rounded-lg bg-green-600 px-4 py-2.5 text-sm font-medium  leading-normal text-white shadow-sm hover:shadow-md] focus:bg-green-700 focus:shadow-[0_8px_9px_-4px_rgba(5,150,105,0.3),0_4px_18px_0_rgba(5,150,105,0.2)] focus:outline-none focus:ring-0 active:bg-green-800"
+              onClick={() => setShowInvitations(!showInvitations)}
+            >
+              {showInvitations ? 'Ocultar Invitaciones' : 'Gestionar Invitaciones'}
+            </button>
+          </div>
+        </div>
+        <div className="flex-1 grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
+          <span className="inline-block whitespace-nowrap rounded-[0.27rem] bg-info-100 px-[0.65em] pb-[0.25em] pt-[0.35em] text-center align-baseline text-[0.75em] font-bold leading-none text-info-800 text-sky-700">
+            Monto: U$S {item.budget}
+          </span>
+
+          <span
+            className={`${
+              item.location?.id === "e8bbe98e-a725-44bb-b7d8-990013794f5c"
+                ? "bg-success-100 text-success-700"
+                : item.location?.id === "9a83f3bb-0472-4e7e-bb67-9c8bdf996cd3"
+                ? "bg-danger-500 text-danger-700"
+                : "bg-info-800 text-info-700"
+            } bg-sky-700 text-white inline-block whitespace-nowrap rounded-[0.27rem]  px-[0.65em] pb-[0.25em] pt-[0.35em] text-center align-baseline text-[0.75em] font-bold leading-none `}
+          >
+            Lugar: {item.location?.name}
+          </span>
+          <span className="inline-block whitespace-nowrap rounded-[0.27rem] bg-red-500 px-[0.65em] pb-[0.25em] pt-[0.35em] text-center align-baseline text-[0.75em] font-bold leading-none text-info-200">
+            Vence: {item.validityDate}
+          </span>
+          <div className="flex flex-col items-center gap-2">
+            <p>Total de Propuestas</p>
+            <Link href={`tenders/tenderProposals/${id}`} className="text-white">
+              <div
+                className={`${
+                  totalProposal > 0 ? "border-green-500" : "border-red-500"
+                } border-3  w-16 h-16 rounded-full flex justify-center items-center cursor-pointer`}
+              >
+                <span className={`${totalProposal > 0 ? "text-green-500" : "text-red-500"}  font-semibold`}>
+                  {totalProposal > 0 ? totalProposal : "0"}
+                </span>
+              </div>
+            </Link>
+          </div>
+        </div>
+      </div>
+      
+      {/* Panel de invitaciones */}
+      {showInvitations && (
+        <TenderInvitationsPanel 
+          tenderId={item.id} 
+          tenderTitle={item.title} 
+        />
+      )}
+    </div>
+  );
+}
+
+export default CardUserTender
+
+

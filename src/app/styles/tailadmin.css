@@ -1,0 +1,117 @@
+/* TailAdmin Custom Styles */
+
+/* Sidebar animation */
+.sidebar-expanded {
+  @apply overflow-hidden;
+}
+
+/* Custom scrollbar */
+.no-scrollbar::-webkit-scrollbar {
+  display: none;
+}
+
+.no-scrollbar {
+  -ms-overflow-style: none;
+  scrollbar-width: none;
+}
+
+/* Drop shadow utilities */
+.drop-shadow-1 {
+  filter: drop-shadow(0px 1px 0px #E2E8F0);
+}
+
+.drop-shadow-2 {
+  filter: drop-shadow(0px 1px 4px rgba(0, 0, 0, 0.12));
+}
+
+/* Box shadow utilities */
+.shadow-1 {
+  box-shadow: 0px 1px 3px rgba(0, 0, 0, 0.08);
+}
+
+.shadow-2 {
+  box-shadow: 0px 1px 4px rgba(0, 0, 0, 0.12);
+}
+
+.shadow-card {
+  box-shadow: 0px 1px 3px rgba(0, 0, 0, 0.12);
+}
+
+.shadow-card-2 {
+  box-shadow: 0px 1px 4px rgba(0, 0, 0, 0.12);
+}
+
+/* Dark mode specific styles */
+@media (prefers-color-scheme: dark) {
+  .dark\:drop-shadow-none {
+    filter: none;
+  }
+}
+
+/* Custom gradient backgrounds */
+.bg-gradient {
+  background: linear-gradient(90deg, #3C50E0 0%, #8FD0EF 100%);
+}
+
+/* Animation classes */
+.duration-300 {
+  transition-duration: 300ms;
+}
+
+.ease-linear {
+  transition-timing-function: linear;
+}
+
+.ease-in-out {
+  transition-timing-function: cubic-bezier(0.4, 0, 0.2, 1);
+}
+
+/* Z-index utilities */
+.z-999 {
+  z-index: 999;
+}
+
+.z-9999 {
+  z-index: 9999;
+}
+
+.z-99999 {
+  z-index: 99999;
+}
+
+/* React Admin override styles */
+.RaLayout-appFrame {
+  margin-top: 0 !important;
+}
+
+.RaLayout-content {
+  margin-top: 0 !important;
+  padding-top: 0 !important;
+}
+
+.RaAppBar-root {
+  display: none !important;
+}
+
+.RaSidebar-root {
+  display: none !important;
+}
+
+.RaLayout-main {
+  margin-left: 0 !important;
+  padding: 0 !important;
+}
+
+/* Custom form styles for React Admin */
+.RaFormInput-input {
+  @apply border border-stroke bg-transparent py-3 px-5 outline-none transition focus:border-primary active:border-primary disabled:cursor-default disabled:bg-whiter dark:border-form-strokedark dark:bg-form-input dark:focus:border-primary;
+}
+
+/* Custom button styles */
+.btn-primary {
+  @apply inline-flex items-center justify-center rounded-md bg-primary py-4 px-10 text-center font-medium text-white hover:bg-opacity-90 lg:px-8 xl:px-10;
+}
+
+.btn-secondary {
+  @apply inline-flex items-center justify-center rounded-md border border-primary py-4 px-10 text-center font-medium text-primary hover:bg-opacity-90 lg:px-8 xl:px-10;
+}

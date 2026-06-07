@@ -1,0 +1,124 @@
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+/* TailAdmin Custom Styles */
+
+/* Sidebar animation */
+.sidebar-expanded {
+  overflow: hidden;
+}
+
+/* Custom scrollbar */
+.no-scrollbar::-webkit-scrollbar {
+  display: none;
+}
+
+.no-scrollbar {
+  -ms-overflow-style: none;
+  scrollbar-width: none;
+}
+
+/* Drop shadow utilities */
+.drop-shadow-1 {
+  filter: drop-shadow(0px 1px 0px #E2E8F0);
+}
+
+.drop-shadow-2 {
+  filter: drop-shadow(0px 1px 4px rgba(0, 0, 0, 0.12));
+}
+
+/* Box shadow utilities */
+.shadow-1 {
+  box-shadow: 0px 1px 3px rgba(0, 0, 0, 0.08);
+}
+
+.shadow-2 {
+  box-shadow: 0px 1px 4px rgba(0, 0, 0, 0.12);
+}
+
+.shadow-card {
+  box-shadow: 0px 1px 3px rgba(0, 0, 0, 0.12);
+}
+
+.shadow-card-2 {
+  box-shadow: 0px 1px 4px rgba(0, 0, 0, 0.12);
+}
+
+/* Dark mode specific styles */
+@media (prefers-color-scheme: dark) {
+  .dark\:drop-shadow-none {
+    filter: none;
+  }
+}
+
+/* React Admin override styles - Completamente ocultar sidebar y header */
+.RaLayout-appFrame {
+  margin-top: 0 !important;
+}
+
+.RaLayout-content {
+  margin-top: 0 !important;
+  padding-top: 0 !important;
+  margin-left: 0 !important;
+}
+
+.RaAppBar-root {
+  display: none !important;
+}
+
+.RaSidebar-root {
+  display: none !important;
+}
+
+.RaLayout-main {
+  margin-left: 0 !important;
+  padding: 0 !important;
+}
+
+.RaLayout-root {
+  display: flex;
+  flex-direction: column;
+  width: 100%;
+  height: 100%;
+}
+
+/* Ocultar cualquier elemento de navegación de React Admin */
+.RaMenu-open, .RaMenu-closed {
+  display: none !important;
+}
+
+nav[role="navigation"] {
+  display: none !important;
+}
+
+/* Asegurar que el contenido ocupe todo el espacio */
+.RaLayout-content {
+  flex: 1;
+  width: 100% !important;
+  max-width: 100% !important;
+}
+
+/* Base styles for dark mode support */
+@layer base {
+  html {
+    font-family: 'Satoshi', sans-serif;
+    overflow-x: hidden;
+  }
+
+  body {
+    @apply font-normal text-base text-body bg-white dark:bg-boxdark;
+    overflow-x: hidden;
+  }
+}
+
+/* Component styles */
+@layer components {
+  .btn-primary {
+    @apply inline-flex items-center justify-center rounded-md bg-primary py-4 px-10 text-center font-medium text-white hover:bg-opacity-90 lg:px-8 xl:px-10;
+  }
+
+  .btn-secondary {
+    @apply inline-flex items-center justify-center rounded-md border border-primary py-4 px-10 text-center font-medium text-primary hover:bg-opacity-90 lg:px-8 xl:px-10;
+  }
+}
