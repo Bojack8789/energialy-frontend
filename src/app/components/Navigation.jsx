@@ -211,6 +211,8 @@ export default function Navigation() {
               </>
             ) : (
               <>
+                {navLink("/directory", "Directorio")}
+                {navLink("/tenders", "Licitaciones")}
                 <Link href="/login" className={`text-sm font-medium no-underline transition-colors duration-200 ${pathname === "/login" ? "text-primary-500 border-b-2 border-primary-500 pb-0.5" : "text-gray-700 hover:text-primary-500"}`}>
                   Iniciar Sesión
                 </Link>
@@ -280,6 +282,8 @@ export default function Navigation() {
               </>
             ) : (
               <>
+                {mobileNavLink("/directory", "Directorio")}
+                {mobileNavLink("/tenders", "Licitaciones")}
                 {mobileNavLink("/login", "Iniciar Sesión")}
                 {mobileNavLink("/register", "Registrarse")}
               </>
