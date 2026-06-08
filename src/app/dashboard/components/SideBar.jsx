@@ -151,6 +151,26 @@ export default function SideBar() {
           priority
         />
 
+        {/* Links centrales — Directorio y Licitaciones */}
+        <div style={{ display: 'flex', alignItems: 'center', gap: 24 }}>
+          <Link
+            href="/directory"
+            style={{ fontSize: 14, fontWeight: 500, color: '#374151', textDecoration: 'none' }}
+            onMouseEnter={e => { e.currentTarget.style.color = '#191654'; }}
+            onMouseLeave={e => { e.currentTarget.style.color = '#374151'; }}
+          >
+            Directorio
+          </Link>
+          <Link
+            href="/tenders"
+            style={{ fontSize: 14, fontWeight: 500, color: '#374151', textDecoration: 'none' }}
+            onMouseEnter={e => { e.currentTarget.style.color = '#191654'; }}
+            onMouseLeave={e => { e.currentTarget.style.color = '#374151'; }}
+          >
+            Licitaciones
+          </Link>
+        </div>
+
         {/* Lado derecho */}
         <div style={{ display: 'flex', alignItems: 'center', gap: 12 }}>
 
