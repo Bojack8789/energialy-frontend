@@ -11,7 +11,7 @@ function TenderContainer({ data }) {
 
   const filterTenders = useSelector((state) => state.tender.filterTenders);
   const userData = getLocalStorage();
-  const tenderFilteredByUser = filterTenders?.filter((tender) => tender.company.id !== userData.company.id);
+  const tenderFilteredByUser = filterTenders?.filter((tender) => tender.company?.id !== userData?.company?.id);
   const itemsPerPage = 3;
   const totalPages = Math.ceil(tenderFilteredByUser?.length / itemsPerPage);
   // Calcula las compañías que se mostrarán en la página actual
