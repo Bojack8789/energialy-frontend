@@ -27,7 +27,7 @@ const CardProposal = ({ item }) => {
           <div className="mb-2">
             <div className="flex items-center justify-between mb-3">
               <span className="inline-block whitespace-nowrap rounded-[0.27rem] bg-primary-100 p-3 text-center align-baseline text-base font-bold leading-none text-primary-700 mb-3">
-                {item.tender.Company.name}
+                {item.tender?.Company?.name}
               </span>
             </div>
             <h5 className="mb-2 text-xl font-semibold leading-tight text-neutral-800 dark:text-neutral-50">

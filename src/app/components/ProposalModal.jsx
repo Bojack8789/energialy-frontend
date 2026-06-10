@@ -321,7 +321,7 @@ export function ProposalModal({open, handleOpen, data}) {
         <div className="mx-auto w-full max-w-[75%]  p-4 bg-slate-50 rounded-md">
           <div className="flex flex-col gap-2 md:flex-row ">
             <div className="md:min-w-[75%]">
-              <h4 className="mb-4 text-xl">{data.company.name}</h4>
+              <h4 className="mb-4 text-xl">{data.company?.name}</h4>
               <h5 className="mb-4 text-lg">{data.title}</h5>
               <p className="mb-4 text-base">
                 Duración del proyecto: {data.projectDuration}
@@ -348,7 +348,7 @@ export function ProposalModal({open, handleOpen, data}) {
                       : "bg-info-800 text-info-700"
                   } inline-block whitespace-nowrap rounded-[0.27rem]  px-[0.65em] pb-[0.25em] pt-[0.35em] text-center align-baseline text-[0.75em] font-bold leading-none `}
                 >
-                  {data.location.name}
+                  {data.location?.name}
                 </span>
               )}
               {!data.location && data.address && (

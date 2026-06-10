@@ -29,7 +29,7 @@ function DashboardTableData({title, data}) {
     );
 
     if (winner !== undefined) {
-      return winner.Company.name;
+      return winner.Company?.name || 'Sin nombre';
     } else {
       return "No Adjudicada";
     }

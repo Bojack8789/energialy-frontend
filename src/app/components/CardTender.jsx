@@ -29,9 +29,9 @@ const CardTender = ({item}) => {
       <div className="flex-1">
         <div className="flex items-center gap-3 mb-3 flex-wrap">
           <span className="inline-block whitespace-nowrap rounded-[0.27rem] bg-primary-100 p-3 text-center align-baseline text-base font-bold leading-none text-primary-700">
-            {item.company.name}
+            {item.company?.name}
           </span>
-          {item.company.id && (
+          {item.company?.id && (
             <button
               type="button"
               className="inline-block rounded bg-gray-100 border border-gray-300 px-3 py-1.5 text-xs font-medium text-gray-700 hover:bg-gray-200 transition-colors"
