@@ -47,7 +47,7 @@ function CreateTenderForm() {
     description: "",
     contractType: "",
     budget: 0,
-    showBudget: false,
+    showBudget: true,
     majorSector: "",
     projectDuration: "",
     validityDate: "",
@@ -135,15 +135,9 @@ function CreateTenderForm() {
   };
 
   const handleShowChange = () => {
-    // if(isShow === false){
-    //   setIsShow(true);
-    //    setTenderData({ ...tenderData, showBudget: true });
-    // }else{
-    //   setIsShow(false)
-    //    setTenderData({ ...tenderData, showBudget: false });
-    // }
-    setIsShow(!isShow);
-    setTenderData({ ...tenderData, showBudget: isShow });
+    const newValue = !isShow;
+    setIsShow(newValue);
+    setTenderData({ ...tenderData, showBudget: newValue });
   };
 
   // const handleDescriptionChange = (data) => {
