@@ -26,9 +26,9 @@ function CompanyDashboard({ user }) {
 
   useEffect(() => {
     if (user.company) {
-      setUserProposals(proposals?.filter((p) => p.company.id === user.company.id));
-      setProposalsToUser(proposals?.filter((p) => p.tender.Company.id === user.company.id));
-      setUserTenders(tenders?.filter((t) => t.company.id === user.company.id));
+      setUserProposals(proposals?.filter((p) => p.company?.id === user.company.id));
+      setProposalsToUser(proposals?.filter((p) => p.tender?.Company?.id === user.company.id));
+      setUserTenders(tenders?.filter((t) => t.company?.id === user.company.id));
     }
   }, [proposals, tenders, user.company]);
 
