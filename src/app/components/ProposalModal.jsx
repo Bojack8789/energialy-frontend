@@ -106,14 +106,34 @@ export function ProposalModal({open, handleOpen, data}) {
     //   }
     //   console.log(error);
     // };
+    const getValidToken = async () => {
+      let token = typeof window !== 'undefined' ? sessionStorage.getItem('accessToken') : null;
+      if (!token) {
+        try {
+          const refreshRes = await axios.get(`${urlProduction}/refresh`, { withCredentials: true });
+          token = refreshRes.data.accessToken;
+          if (token) sessionStorage.setItem('accessToken', token);
+        } catch {
+          return null;
+        }
+      }
+      return token;
+    };
+
     const createProposal = async (proposal) => {
       try {
+        const token = await getValidToken();
+        if (!token) {
+          displayFailedMessage("Tu sesión expiró. Por favor iniciá sesión nuevamente.");
+          setTimeout(() => { window.location.href = '/'; }, 2000);
+          return;
+        }
         const response = await axios.post(
           `${urlProduction}/proposals`,
           proposal,
           {
             headers: {
-              Authorization: `Bearer ${accessToken}`
+              Authorization: `Bearer ${token}`
             }
           }
         );
@@ -143,15 +163,12 @@ export function ProposalModal({open, handleOpen, data}) {
       } catch (error) {
         console.log(error.response);
 
-        // Check if token expired or is invalid (401 or 403 errors for authentication)
-        if (error.response?.status === 401 && error.response?.data?.error === 'Invalid or expired token') {
-          displayFailedMessage(
-            "Tu sesión ha expirado. Por favor inicia sesión nuevamente."
-          );
-          setTimeout(() => {
-            sessionStorage.removeItem('user');
-            window.location.href = '/';
-          }, 2000);
+        // Token inválido o expirado — limpiar y redirigir al login
+        if ((error.response?.status === 401 || error.response?.status === 403) &&
+            error.response?.data?.error === 'Invalid or expired token') {
+          sessionStorage.removeItem('accessToken');
+          displayFailedMessage("Tu sesión ha expirado. Por favor iniciá sesión nuevamente.");
+          setTimeout(() => { sessionStorage.removeItem('user'); window.location.href = '/'; }, 2000);
         }
         // Check for subscription limit errors (403 from middleware)
         else if (error.response?.status === 403) {
