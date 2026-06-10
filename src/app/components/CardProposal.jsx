@@ -87,7 +87,7 @@ const CardProposal = ({ item }) => {
             <button
               type="button"
               className="inline-block rounded bg-primary-800 px-6 pb-2 pt-2.5 text-xs font-medium uppercase leading-normal text-white shadow-[0_4px_9px_-4px_#3b71ca] transition duration-150 ease-in-out hover:bg-primary-600"
-              onClick={() => router.push(`/tenders/${item.tender.id}`)}
+              onClick={() => item.tender?.id && router.push(`/tenders/${item.tender.id}`)}
             >
               Ver Licitación
             </button>
