@@ -42,30 +42,26 @@ function FilterBar() {
   };
 
   const handleChangeCategories = (e) => {
-    //crear las subcategorias para el select
     const subcategories = categories?.find(cat => cat.id === e.value).subcategories
-    setSubCatSelected(subcategories.map(subcat => ({label:subcat.name, value:subcat.id})))      
-      
-    //mandar a redux las categorias seleccionada para modificar el filterCompanies
+    setSubCatSelected(subcategories.map(subcat => ({label:subcat.name, value:subcat.id})))
+    setCategorieSelected(e)
+
     if(path.includes("directory")){
       dispatch(filterCompaniesByCategorie(e.value))
     }
-    // if(path.includes("tenders")){
-    //   dispatch(filterTendersByCategorie(e.value))
-    // }
-    //setear su propio estado para no perder la referencia
-    setCategorieSelected(e)
+    if(path.includes("tenders")){
+      dispatch(filterTendersByCategorie(e.value))
+    }
   }
-  
+
   const handleSubcategorieChange = (e) => {
-    if(categorieSelected.length === 0) return
+    if(!categorieSelected) return
     if(path.includes("directory")){
       dispatch(filterCompaniesBySubcategorie(e.value))
     }
     if(path.includes("tenders")){
       dispatch(filterTendersBySubcategorie(e.value))
     }
-    // setSubCatSelected(e)
   }
   
 
