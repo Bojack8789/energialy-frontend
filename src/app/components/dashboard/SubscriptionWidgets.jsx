@@ -9,8 +9,30 @@ import ProgressBarCard from '@/app/components/ui/cards/ProgressBarCard';
  * Incluye: Plan actual, Licitaciones y Propuestas con barras de progreso
  */
 const SubscriptionWidgets = ({ companyId, selectedPeriod = 30 }) => {
-  // Estado para el modal de planes
   const [showPlansModal, setShowPlansModal] = useState(false);
+  const [loadingPlan, setLoadingPlan] = useState(null);
+
+  const handleSubscribe = async (planCode) => {
+    setLoadingPlan(planCode);
+    try {
+      const token = typeof window !== 'undefined' ? sessionStorage.getItem('accessToken') : null;
+      const res = await fetch(`${process.env.NEXT_PUBLIC_BASE_URL}/checkout`, {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json', Authorization: `Bearer ${token}` },
+        body: JSON.stringify({ planCode, companyId }),
+      });
+      const data = await res.json();
+      if (data.checkoutUrl) {
+        window.location.href = data.checkoutUrl;
+      } else {
+        alert(data.error || 'Error al generar el link de pago');
+      }
+    } catch (e) {
+      alert('Error al conectar con el servidor de pagos');
+    } finally {
+      setLoadingPlan(null);
+    }
+  };
 
   // Obtener datos de métricas
   const { data: metricsData, isLoading } = useGetCompanyMetricsQuery(
@@ -287,8 +309,12 @@ const SubscriptionWidgets = ({ companyId, selectedPeriod = 30 }) => {
                       Plan Actual
                     </div>
                   ) : (
-                    <button className="w-full bg-blue-500 hover:bg-blue-600 text-white py-2 rounded-lg font-semibold transition-colors">
-                      Próximamente
+                    <button
+                      onClick={() => handleSubscribe('base')}
+                      disabled={loadingPlan === 'base'}
+                      className="w-full bg-blue-500 hover:bg-blue-600 disabled:opacity-60 text-white py-2 rounded-lg font-semibold transition-colors"
+                    >
+                      {loadingPlan === 'base' ? 'Redirigiendo...' : 'Suscribirse'}
                     </button>
                   )}
                 </div>
@@ -337,8 +363,12 @@ const SubscriptionWidgets = ({ companyId, selectedPeriod = 30 }) => {
                       Plan Actual
                     </div>
                   ) : (
-                    <button className="w-full bg-purple-500 hover:bg-purple-600 text-white py-2 rounded-lg font-semibold transition-colors">
-                      Próximamente
+                    <button
+                      onClick={() => handleSubscribe('plus')}
+                      disabled={loadingPlan === 'plus'}
+                      className="w-full bg-purple-500 hover:bg-purple-600 disabled:opacity-60 text-white py-2 rounded-lg font-semibold transition-colors"
+                    >
+                      {loadingPlan === 'plus' ? 'Redirigiendo...' : 'Suscribirse'}
                     </button>
                   )}
                 </div>
