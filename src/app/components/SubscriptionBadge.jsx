@@ -11,6 +11,29 @@ const SubscriptionBadge = ({ companyId }) => {
   const [loading, setLoading] = useState(true);
   const [showModal, setShowModal] = useState(false);
   const [tokenExpired, setTokenExpired] = useState(false);
+  const [loadingPlan, setLoadingPlan] = useState(null);
+
+  const handleSubscribe = async (planCode) => {
+    setLoadingPlan(planCode);
+    try {
+      const token = typeof window !== 'undefined' ? sessionStorage.getItem('accessToken') : null;
+      const res = await fetch(`${process.env.NEXT_PUBLIC_BASE_URL}/checkout`, {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json', Authorization: `Bearer ${token}` },
+        body: JSON.stringify({ planCode, companyId }),
+      });
+      const data = await res.json();
+      if (data.checkoutUrl) {
+        window.location.href = data.checkoutUrl;
+      } else {
+        alert(data.error || 'Error al generar el link de pago');
+      }
+    } catch {
+      alert('Error al conectar con el servidor de pagos');
+    } finally {
+      setLoadingPlan(null);
+    }
+  };
 
   useEffect(() => {
     console.log('SubscriptionBadge - companyId:', companyId);
@@ -246,8 +269,12 @@ const SubscriptionBadge = ({ companyId }) => {
                       Plan Actual
                     </div>
                   ) : (
-                    <button className="w-full bg-blue-500 hover:bg-blue-600 text-white py-2 rounded-lg font-semibold transition-colors">
-                      Próximamente
+                    <button
+                      onClick={() => handleSubscribe('base')}
+                      disabled={loadingPlan === 'base'}
+                      className="w-full bg-blue-500 hover:bg-blue-600 disabled:opacity-60 text-white py-2 rounded-lg font-semibold transition-colors"
+                    >
+                      {loadingPlan === 'base' ? 'Redirigiendo...' : 'Elegir plan'}
                     </button>
                   )}
                 </div>
@@ -296,8 +323,12 @@ const SubscriptionBadge = ({ companyId }) => {
                       Plan Actual
                     </div>
                   ) : (
-                    <button className="w-full bg-purple-500 hover:bg-purple-600 text-white py-2 rounded-lg font-semibold transition-colors">
-                      Próximamente
+                    <button
+                      onClick={() => handleSubscribe('plus')}
+                      disabled={loadingPlan === 'plus'}
+                      className="w-full bg-purple-500 hover:bg-purple-600 disabled:opacity-60 text-white py-2 rounded-lg font-semibold transition-colors"
+                    >
+                      {loadingPlan === 'plus' ? 'Redirigiendo...' : 'Elegir plan'}
                     </button>
                   )}
                 </div>

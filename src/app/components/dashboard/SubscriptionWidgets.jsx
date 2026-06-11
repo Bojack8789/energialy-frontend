@@ -314,7 +314,7 @@ const SubscriptionWidgets = ({ companyId, selectedPeriod = 30 }) => {
                       disabled={loadingPlan === 'base'}
                       className="w-full bg-blue-500 hover:bg-blue-600 disabled:opacity-60 text-white py-2 rounded-lg font-semibold transition-colors"
                     >
-                      {loadingPlan === 'base' ? 'Redirigiendo...' : 'Suscribirse'}
+                      {loadingPlan === 'base' ? 'Redirigiendo...' : 'Elegir plan'}
                     </button>
                   )}
                 </div>
@@ -368,7 +368,7 @@ const SubscriptionWidgets = ({ companyId, selectedPeriod = 30 }) => {
                       disabled={loadingPlan === 'plus'}
                       className="w-full bg-purple-500 hover:bg-purple-600 disabled:opacity-60 text-white py-2 rounded-lg font-semibold transition-colors"
                     >
-                      {loadingPlan === 'plus' ? 'Redirigiendo...' : 'Suscribirse'}
+                      {loadingPlan === 'plus' ? 'Redirigiendo...' : 'Elegir plan'}
                     </button>
                   )}
                 </div>
