@@ -623,8 +623,8 @@ function InboxPage() {
                   </div>
                 )}
 
-                {/* ── RECOMENDACIONES ── */}
-                {recommendedCompanies.length > 0 && (
+                {/* ── RECOMENDACIONES — solo cuando no hay conversaciones previas ── */}
+                {conversedCompanies.length === 0 && recommendedCompanies.length > 0 && (
                   <div>
                     <p className="text-xs font-semibold px-2 mb-1 mt-2" style={{ color: "#64748b" }}>
                       Empresas sugeridas
