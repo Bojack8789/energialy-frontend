@@ -46,27 +46,6 @@ export const menuBar = [
     ],
   },
   {
-    title: "Financiamiento",
-    url: "/dashboard/finanzas",
-    auth: ["admin", "superAdmin", "company_collaborator", "company_owner"],
-    icon: <BiSolidBank />,
-    submenu: true,
-    submenuItems: [
-      {
-        title: "Mis Solicitudes",
-        url: "/dashboard/finanzas/solicitudes",
-      },
-      {
-        title: "Apertura de cuenta",
-        url: "/dashboard/finanzas/aperturaCuenta",
-      },
-      {
-        title: "Solicitar producto",
-        url: "/dashboard/finanzas/solicitarProducto",
-      },
-    ],
-  },
-  {
     title: "Banco",
     //url: "/dashboard/bank",
     auth: ["bank"],

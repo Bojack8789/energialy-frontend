@@ -24,6 +24,7 @@ import { useRouter } from "next/navigation";
 import getLocalStorage from "@/app/Func/localStorage";
 import LimitExceededModal from "@/app/components/LimitExceededModal";
 import ToggleSwitch from "@/app/components/ToggleSwitch";
+import { useGetCompanyMetricsQuery } from "@/app/redux/services/metricsApi";
 
 function CreateTenderForm() {
   //fetch states
@@ -40,6 +41,13 @@ function CreateTenderForm() {
 
   const userData = getLocalStorage();
 
+  const { data: metricsData } = useGetCompanyMetricsQuery(
+    { companyId: userData?.company?.id },
+    { skip: !userData?.company?.id }
+  );
+  const canCreatePrivate = metricsData?.plan?.canCreatePrivate ?? false;
+  const canFeatureTender = metricsData?.plan?.featuredInDirectory ?? false;
+
   const router = useRouter();
   //local states
   const [tenderData, setTenderData] = useState({
@@ -48,6 +56,7 @@ function CreateTenderForm() {
     contractType: "",
     budget: 0,
     showBudget: true,
+    public: true,
     majorSector: "",
     projectDuration: "",
     validityDate: "",
@@ -119,19 +128,15 @@ function CreateTenderForm() {
     setTenderData({ ...tenderData, locationId: e.value });
   };
   const handlePrivateChange = (e) => {
-    if (isPrivateCheqed === false) {
-      setIsPrivateCheqed(true);
-    } else {
-      setIsPrivateCheqed(false);
-    }
+    if (!canCreatePrivate) return;
+    const newValue = !isPrivateCheqed;
+    setIsPrivateCheqed(newValue);
+    setTenderData({ ...tenderData, public: !newValue });
   };
 
   const handleSponsoredChange = (e) => {
-    if (isSponsoredCheqed === false) {
-      setIsSponsoredCheqed(true);
-    } else {
-      setIsSponsoredCheqed(false);
-    }
+    if (!canFeatureTender) return;
+    setIsSponsoredCheqed(!isSponsoredCheqed);
   };
 
   const handleShowChange = () => {
@@ -632,58 +637,107 @@ function CreateTenderForm() {
               {inputError.locationId !== "" ? (
                 <ErrorMensage message={inputError.locationId} />
               ) : null}
-              <input
-                className="w-full border-1 border-gray-300 rounded-md p-3"
-                type="text"
-                name="address"
-                placeholder="Su Dirección"
-                onChange={handleInputsChanges}
-              />
-            </div>
-          </div>
-          {/*suscription plus*/}
-          <div className="flex flex-col gap-4 mt-4">
-            <div className="border-l-4 border-primary-600 flex justify-between">
-              <Typography variant="h6" className="ml-5 my-0">
-                Licitación Destacada
-              </Typography>
-              <div className="flex gap-4">
-                <label
-                  className="inline-block pl-[0.15rem] hover:cursor-pointer"
-                  htmlFor="flexSwitchCheckDefaultSponsored"
-                >
-                  {isSponsoredCheqed ? "Destacar" : "No destacar"}
-                </label>
+              <div className="relative">
                 <input
-                  className="mr-2 mt-[0.3rem] h-3.5 w-8 appearance-none rounded-[0.4375rem] bg-neutral-300 before:pointer-events-none before:absolute before:h-3.5 before:w-3.5 before:rounded-full before:bg-transparent before:content-[''] after:absolute after:z-[2] after:-mt-[0.1875rem] after:h-5 after:w-5 after:rounded-full after:border-none after:bg-neutral-100 after:shadow-[0_0px_3px_0_rgb(0_0_0_/_7%),_0_2px_2px_0_rgb(0_0_0,0.14),_0_1px_5px_0_rgba(0,0,0,0.12)] after:transition-[background-color_0.2s,transform_0.2s] after:content-[''] checked:bg-primary checked:after:absolute checked:after:z-[2] checked:after:-mt-[3px] checked:after:ml-[1.0625rem] checked:after:h-5 checked:after:w-5 checked:after:rounded-full checked:after:border-none checked:after:bg-primary checked:after:shadow-[0_3px_1px_-2px_rgba(0,0,0,0.2),_0_2px_2px_0_rgba(0,0,0,0.14),_0_1px_5px_0_rgba(0,0,0,0.12)] checked:after:transition-[background-color_0.2s,transform_0.2s] checked:after:content-[''] hover:cursor-pointer focus:outline-none focus:ring-0 focus:before:scale-100 focus:before:opacity-[0.12] focus:before:shadow-[3px_-1px_0px_13px_rgba(0,0,0,0.6)] focus:before:transition-[box-shadow_0.2s,transform_0.2s] focus:after:absolute focus:after:z-[1] focus:after:block focus:after:h-5 focus:after:w-5 focus:after:rounded-full focus:after:content-[''] checked:focus:border-primary checked:focus:bg-primary checked:focus:before:ml-[1.0625rem] checked:focus:before:scale-100 checked:focus:before:shadow-[3px_-1px_0px_13px_#3b71ca] checked:focus:before:transition-[box-shadow_0.2s,transform_0.2s] dark:bg-neutral-600 dark:after:bg-neutral-400 dark:checked:bg-primary dark:checked:after:bg-primary dark:focus:before:shadow-[3px_-1px_0px_13px_rgba(255,255,255,0.4)] dark:checked:focus:before:shadow-[3px_-1px_0px_13px_#3b71ca]"
-                  type="checkbox"
-                  role="switch"
-                  id="flexSwitchCheckDefaultSponsored"
-                  onChange={handleSponsoredChange}
+                  className={`w-full border-1 border-gray-300 rounded-md p-3 ${!canCreatePrivate ? "bg-gray-50 text-gray-400 cursor-not-allowed pr-56" : ""}`}
+                  type="text"
+                  name="address"
+                  placeholder="Su Dirección"
+                  onChange={handleInputsChanges}
+                  disabled={!canCreatePrivate}
                 />
+                {!canCreatePrivate && (
+                  <span className="absolute right-3 top-1/2 -translate-y-1/2 text-xs text-orange-500 font-medium pointer-events-none">
+                    Disponible al Actualizar tu Suscripcion &gt;
+                  </span>
+                )}
               </div>
             </div>
           </div>
+          {/*Licitación Destacada*/}
           <div className="flex flex-col gap-4 mt-4">
-            <div className="border-l-4 border-primary-600 flex justify-between">
+            <div className="border-l-4 border-primary-600 flex justify-between items-center">
+              <Typography variant="h6" className="ml-5 my-0">
+                Licitación Destacada
+              </Typography>
+              <div className="flex items-center gap-3">
+                {!canFeatureTender ? (
+                  <span className="text-xs text-orange-500 font-medium bg-orange-50 border border-orange-200 rounded px-2 py-1">
+                    Disponible al Actualizar tu Suscripcion &gt;
+                  </span>
+                ) : (
+                  <label
+                    className="inline-block pl-[0.15rem] hover:cursor-pointer text-sm text-gray-600"
+                    htmlFor="flexSwitchCheckDefaultSponsored"
+                  >
+                    {isSponsoredCheqed ? "Destacar" : "No destacar"}
+                  </label>
+                )}
+                <div className="relative group">
+                  <input
+                    className={`mr-2 mt-[0.3rem] h-3.5 w-8 appearance-none rounded-[0.4375rem] before:pointer-events-none before:absolute before:h-3.5 before:w-3.5 before:rounded-full before:bg-transparent before:content-[''] after:absolute after:z-[2] after:-mt-[0.1875rem] after:h-5 after:w-5 after:rounded-full after:border-none after:bg-neutral-100 after:shadow-[0_0px_3px_0_rgb(0_0_0_/_7%),_0_2px_2px_0_rgb(0_0_0,0.14),_0_1px_5px_0_rgba(0,0,0,0.12)] after:transition-[background-color_0.2s,transform_0.2s] after:content-[''] checked:after:absolute checked:after:z-[2] checked:after:-mt-[3px] checked:after:ml-[1.0625rem] checked:after:h-5 checked:after:w-5 checked:after:rounded-full checked:after:border-none checked:after:shadow-[0_3px_1px_-2px_rgba(0,0,0,0.2),_0_2px_2px_0_rgba(0,0,0,0.14),_0_1px_5px_0_rgba(0,0,0,0.12)] checked:after:transition-[background-color_0.2s,transform_0.2s] checked:after:content-[''] focus:outline-none focus:ring-0 ${
+                      canFeatureTender
+                        ? "bg-neutral-300 hover:cursor-pointer checked:bg-primary checked:after:bg-primary"
+                        : "bg-neutral-200 cursor-not-allowed opacity-50"
+                    }`}
+                    type="checkbox"
+                    role="switch"
+                    id="flexSwitchCheckDefaultSponsored"
+                    checked={isSponsoredCheqed}
+                    onChange={handleSponsoredChange}
+                    disabled={!canFeatureTender}
+                  />
+                  {!canFeatureTender && (
+                    <div className="absolute right-0 bottom-full mb-2 w-48 bg-gray-800 text-white text-xs rounded-lg px-3 py-2 opacity-0 group-hover:opacity-100 transition-opacity pointer-events-none z-10 shadow-lg">
+                      Disponible al Actualizar tu Suscripcion
+                      <div className="absolute top-full right-3 border-4 border-transparent border-t-gray-800"></div>
+                    </div>
+                  )}
+                </div>
+              </div>
+            </div>
+          </div>
+
+          {/*Licitación Privada*/}
+          <div className="flex flex-col gap-4 mt-4">
+            <div className="border-l-4 border-primary-600 flex justify-between items-center">
               <Typography variant="h6" className="ml-5 my-0">
                 Licitación Privada
               </Typography>
-              <div className="flex gap-4">
-                <label
-                  className="inline-block pl-[0.15rem] hover:cursor-pointer"
-                  htmlFor="flexSwitchCheckDefaultPrivate"
-                >
-                  {isPrivateCheqed ? "Privada" : "Publica"}
-                </label>
-
-                <input
-                  className="mr-2 mt-[0.3rem] h-3.5 w-8 appearance-none rounded-[0.4375rem] bg-neutral-300 before:pointer-events-none before:absolute before:h-3.5 before:w-3.5 before:rounded-full before:bg-transparent before:content-[''] after:absolute after:z-[2] after:-mt-[0.1875rem] after:h-5 after:w-5 after:rounded-full after:border-none after:bg-neutral-100 after:shadow-[0_0px_3px_0_rgb(0_0_0_/_7%),_0_2px_2px_0_rgb(0_0_0,0.14),_0_1px_5px_0_rgba(0,0,0,0.12)] after:transition-[background-color_0.2s,transform_0.2s] after:content-[''] checked:bg-primary checked:after:absolute checked:after:z-[2] checked:after:-mt-[3px] checked:after:ml-[1.0625rem] checked:after:h-5 checked:after:w-5 checked:after:rounded-full checked:after:border-none checked:after:bg-primary checked:after:shadow-[0_3px_1px_-2px_rgba(0,0,0,0.2),_0_2px_2px_0_rgba(0,0,0,0.14),_0_1px_5px_0_rgba(0,0,0,0.12)] checked:after:transition-[background-color_0.2s,transform_0.2s] checked:after:content-[''] hover:cursor-pointer focus:outline-none focus:ring-0 focus:before:scale-100 focus:before:opacity-[0.12] focus:before:shadow-[3px_-1px_0px_13px_rgba(0,0,0,0.6)] focus:before:transition-[box-shadow_0.2s,transform_0.2s] focus:after:absolute focus:after:z-[1] focus:after:block focus:after:h-5 focus:after:w-5 focus:after:rounded-full focus:after:content-[''] checked:focus:border-primary checked:focus:bg-primary checked:focus:before:ml-[1.0625rem] checked:focus:before:scale-100 checked:focus:before:shadow-[3px_-1px_0px_13px_#3b71ca] checked:focus:before:transition-[box-shadow_0.2s,transform_0.2s] dark:bg-neutral-600 dark:after:bg-neutral-400 dark:checked:bg-primary dark:checked:after:bg-primary dark:focus:before:shadow-[3px_-1px_0px_13px_rgba(255,255,255,0.4)] dark:checked:focus:before:shadow-[3px_-1px_0px_13px_#3b71ca]"
-                  type="checkbox"
-                  role="switch"
-                  id="flexSwitchCheckDefaultPrivate"
-                  onChange={handlePrivateChange}
-                />
+              <div className="flex items-center gap-3">
+                {!canCreatePrivate ? (
+                  <span className="text-xs text-orange-500 font-medium bg-orange-50 border border-orange-200 rounded px-2 py-1">
+                    Disponible al Actualizar tu Suscripcion &gt;
+                  </span>
+                ) : (
+                  <label
+                    className="inline-block pl-[0.15rem] hover:cursor-pointer text-sm text-gray-600"
+                    htmlFor="flexSwitchCheckDefaultPrivate"
+                  >
+                    {isPrivateCheqed ? "Privada" : "Publica"}
+                  </label>
+                )}
+                <div className="relative group">
+                  <input
+                    className={`mr-2 mt-[0.3rem] h-3.5 w-8 appearance-none rounded-[0.4375rem] before:pointer-events-none before:absolute before:h-3.5 before:w-3.5 before:rounded-full before:bg-transparent before:content-[''] after:absolute after:z-[2] after:-mt-[0.1875rem] after:h-5 after:w-5 after:rounded-full after:border-none after:bg-neutral-100 after:shadow-[0_0px_3px_0_rgb(0_0_0_/_7%),_0_2px_2px_0_rgb(0_0_0,0.14),_0_1px_5px_0_rgba(0,0,0,0.12)] after:transition-[background-color_0.2s,transform_0.2s] after:content-[''] checked:after:absolute checked:after:z-[2] checked:after:-mt-[3px] checked:after:ml-[1.0625rem] checked:after:h-5 checked:after:w-5 checked:after:rounded-full checked:after:border-none checked:after:shadow-[0_3px_1px_-2px_rgba(0,0,0,0.2),_0_2px_2px_0_rgba(0,0,0,0.14),_0_1px_5px_0_rgba(0,0,0,0.12)] checked:after:transition-[background-color_0.2s,transform_0.2s] checked:after:content-[''] focus:outline-none focus:ring-0 ${
+                      canCreatePrivate
+                        ? "bg-neutral-300 hover:cursor-pointer checked:bg-primary checked:after:bg-primary"
+                        : "bg-neutral-200 cursor-not-allowed opacity-50"
+                    }`}
+                    type="checkbox"
+                    role="switch"
+                    id="flexSwitchCheckDefaultPrivate"
+                    checked={isPrivateCheqed}
+                    onChange={handlePrivateChange}
+                    disabled={!canCreatePrivate}
+                  />
+                  {!canCreatePrivate && (
+                    <div className="absolute right-0 bottom-full mb-2 w-48 bg-gray-800 text-white text-xs rounded-lg px-3 py-2 opacity-0 group-hover:opacity-100 transition-opacity pointer-events-none z-10 shadow-lg">
+                      Disponible al Actualizar tu Suscripcion
+                      <div className="absolute top-full right-3 border-4 border-transparent border-t-gray-800"></div>
+                    </div>
+                  )}
+                </div>
               </div>
             </div>
           </div>

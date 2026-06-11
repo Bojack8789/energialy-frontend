@@ -138,10 +138,10 @@ const SubscriptionWidgets = ({ companyId, selectedPeriod = 30 }) => {
       onClick={() => setShowPlansModal(true)}
       className="w-full px-4 py-3 text-sm font-semibold text-white bg-gradient-to-r from-[#191654] to-secondary-600 rounded-lg hover:from-[#252075] hover:to-secondary-700 transition-all duration-200 shadow-lg hover:shadow-xl flex items-center justify-center gap-2"
     >
-      <svg className="h-5 w-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+      Actualizá tu Plan y accedé a más oportunidades.
+      <svg className="h-5 w-5 flex-shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24">
         <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M5 3v4M3 5h4M6 17v4m-2-2h4m5-16l2.286 6.857L21 12l-5.714 2.143L13 21l-2.286-6.857L5 12l5.714-2.143L13 3z" />
       </svg>
-      Accede a los beneficios premium y despega tus estadísticas
     </button>
   ) : null;
 

@@ -7,7 +7,7 @@ import getLocalStorage from '@/app/Func/localStorage';
 import { useGetCompaniesByIdQuery } from '@/app/redux/services/companiesApi';
 import Swal from 'sweetalert2';
 
-const buttonsOptions = ['INVITAR EMPRESAS', 'CREAR LICITACION', 'FINANCIAMIENTO'];
+const buttonsOptions = ['INVITAR EMPRESAS', 'CREAR LICITACION'];
 
 export default function Buttons() {
   const router = useRouter();
@@ -49,16 +49,6 @@ export default function Buttons() {
         });
       } else {
         router.push('/dashboard/tenders/createTender');
-      }
-    } else if (index === 2) {
-      if (!company ) {
-        Swal.fire({
-          title: 'No tienes una cuenta bancaria',
-          text: 'Para solicitar algún producto debes solicitar una apertura de cuenta, dirígete a Financiamiento > Apertura de Cuenta',
-          icon: 'warning',
-        });
-      } else {
-        router.push('/dashboard/finanzas/solicitarProducto');
       }
     }
   };

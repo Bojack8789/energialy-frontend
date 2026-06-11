@@ -19,7 +19,7 @@ function CompanyCardContainer() {
   // * SE OBTIENEN TODAS LA COMPAÑIAS MENOS A LA QUE EL USUARIO PERTENECE
   const companyId = getCompanyId();
   const filterCompanyById = filterCompanies.filter(function(el) {
-    return el.id !== companyId;
+    return String(el.id) !== String(companyId);
   })
 
   //console.log(PaginationComponent.perPage);
@@ -57,7 +57,7 @@ function CompanyCardContainer() {
         <h1>Cargando...</h1>
       ) : (
         <div className="mb-8 grid grid-cols-1 sm:grid-cols-2 gap-4 w-full">
-          {filterCompanies.length > 0 ? (
+          {filterCompanyById.length > 0 ? (
             companiesToShow.map((comp) => (
               <CompanyCard
                 key={comp.id}
