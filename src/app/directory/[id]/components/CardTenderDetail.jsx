@@ -57,7 +57,7 @@ const CardTender = ({item}) => {
           <div className="w-full flex flex-col item-center gap-3">
             {tender.showBudget ? (
               <span className="inline-block whitespace-nowrap rounded-[0.27rem] bg-info-100 px-[0.65em] pb-[0.25em] pt-[0.35em] text-center align-baseline text-[0.75em] font-bold leading-none text-info-800">
-                U$S: {tender.budget}
+                USD: {tender.budget}
               </span>
             ) : (
               <span className="inline-block whitespace-nowrap rounded-[0.27rem] bg-info-100 px-[0.65em] pb-[0.25em] pt-[0.35em] text-center align-baseline text-[0.75em] font-bold leading-none text-info-800">

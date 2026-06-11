@@ -66,7 +66,7 @@ const CardTender = ({item}) => {
       <div className="w-full md:w-auto flex flex-row md:flex-col items-start md:items-center gap-2 sm:gap-3">
         {item.showBudget ? (
           <span className="inline-block whitespace-nowrap rounded-[0.27rem] bg-info-100 px-[0.65em] pb-[0.25em] pt-[0.35em] text-center align-baseline text-[0.75em] font-bold leading-none text-info-800">
-            U$S: {item.budget}
+            USD: {item.budget}
           </span>
         ) : (
           <span className="inline-block whitespace-nowrap rounded-[0.27rem] bg-info-100 px-[0.65em] pb-[0.25em] pt-[0.35em] text-center align-baseline text-[0.75em] font-bold leading-none text-info-800">

@@ -57,13 +57,13 @@ const CardProposal = ({ item }) => {
               {item.serviceFee && (
                 <div className="mb-3">
                   <p className="text-xs font-medium text-neutral-600 mb-1">Fee Energialy</p>
-                  <p className="text-sm text-neutral-800">{item.serviceFee}% (U$S {item.serviceAmount?.toLocaleString()})</p>
+                  <p className="text-sm text-neutral-800">{item.serviceFee}% (USD {item.serviceAmount?.toLocaleString()})</p>
                 </div>
               )}
               {item.receiverAmount && (
                 <div className="mb-3">
                   <p className="text-xs font-medium text-neutral-600 mb-1">Monto a Recibir</p>
-                  <p className="text-sm text-green-700 font-bold">U$S {item.receiverAmount?.toLocaleString()}</p>
+                  <p className="text-sm text-green-700 font-bold">USD {item.receiverAmount?.toLocaleString()}</p>
                 </div>
               )}
             </div>
@@ -98,7 +98,7 @@ const CardProposal = ({ item }) => {
           <div className="flex flex-col gap-3">
             <p className="text-xs font-medium text-neutral-600">Presupuesto Licitación</p>
             <span className="inline-block whitespace-nowrap rounded-[0.27rem] bg-info-100 px-[0.65em] pb-[0.25em] pt-[0.35em] text-center align-baseline text-[0.75em] font-bold leading-none text-info-800">
-              U$S: {item.tender.budget}
+              USD: {item.tender.budget}
             </span>
             <p className="text-xs font-medium text-neutral-600">Estado Licitación</p>
             {item.tender.status === "published" ? (
@@ -114,7 +114,7 @@ const CardProposal = ({ item }) => {
           <div className="flex flex-col gap-3">
             <p className="text-xs font-medium text-neutral-600">Presupuesto Propuesta</p>
             <span className="inline-block whitespace-nowrap rounded-[0.27rem] bg-info-100 px-[0.65em] pb-[0.25em] pt-[0.35em] text-center align-baseline text-[0.75em] font-bold leading-none text-info-800">
-              U$S: {item.totalAmount}
+              USD: {item.totalAmount}
             </span>
             <p className="text-xs font-medium text-neutral-600">Estado Propuesta</p>
             {item.status === "sent" ? (

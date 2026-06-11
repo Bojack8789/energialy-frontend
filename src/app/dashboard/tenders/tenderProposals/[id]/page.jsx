@@ -50,7 +50,7 @@ function Page({params}) {
                   <div>
                     <span className="font-semibold">Presupuesto:</span>{" "}
                     <span className="text-green-600 font-bold">
-                      U$S {tender.budget?.toLocaleString()}
+                      USD {tender.budget?.toLocaleString()}
                     </span>
                   </div>
                   <div>

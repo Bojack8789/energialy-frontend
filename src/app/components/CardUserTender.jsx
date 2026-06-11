@@ -56,7 +56,7 @@ function CardUserTender({item}) {
                     </div>
                     <div className="flex-1 min-w-0">
                       <p className="text-xs sm:text-sm text-gray-500 dark:text-gray-400">Presupuesto</p>
-                      <p className="text-base sm:text-lg font-semibold text-gray-900 dark:text-white">U$S {item.budget}</p>
+                      <p className="text-base sm:text-lg font-semibold text-gray-900 dark:text-white">USD {item.budget}</p>
                     </div>
                   </div>
                 </td>

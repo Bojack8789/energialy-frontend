@@ -180,7 +180,7 @@ const SubscriptionBadge = ({ companyId }) => {
                 <div className="border-2 border-gray-200 rounded-lg p-6 hover:border-gray-400 transition-colors">
                   <div className="text-center">
                     <h3 className="text-xl font-bold text-gray-800 mb-2">GRATIS</h3>
-                    <div className="text-3xl font-bold text-gray-900 mb-1">$0</div>
+                    <div className="text-3xl font-bold text-gray-900 mb-1">USD 0</div>
                     <p className="text-gray-500 text-sm mb-6">Por mes</p>
                   </div>
                   <ul className="space-y-3 mb-6">
@@ -229,7 +229,7 @@ const SubscriptionBadge = ({ companyId }) => {
                   </div>
                   <div className="text-center">
                     <h3 className="text-xl font-bold text-blue-600 mb-2">BASE</h3>
-                    <div className="text-3xl font-bold text-gray-900 mb-1">$49</div>
+                    <div className="text-3xl font-bold text-gray-900 mb-1">USD 49</div>
                     <p className="text-gray-500 text-sm mb-6">Por mes</p>
                   </div>
                   <ul className="space-y-3 mb-6">
@@ -283,7 +283,7 @@ const SubscriptionBadge = ({ companyId }) => {
                 <div className="border-2 border-purple-400 rounded-lg p-6 hover:border-purple-500 transition-colors">
                   <div className="text-center">
                     <h3 className="text-xl font-bold text-purple-600 mb-2">PLUS</h3>
-                    <div className="text-3xl font-bold text-gray-900 mb-1">$69</div>
+                    <div className="text-3xl font-bold text-gray-900 mb-1">USD 69</div>
                     <p className="text-gray-500 text-sm mb-6">Por mes</p>
                   </div>
                   <ul className="space-y-3 mb-6">

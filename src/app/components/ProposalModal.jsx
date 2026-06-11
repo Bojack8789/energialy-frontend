@@ -352,7 +352,7 @@ export function ProposalModal({open, handleOpen, data}) {
             </div>
             <div className="flex flex-col gap-4">
               <span class="inline-block whitespace-nowrap rounded-[0.27rem] bg-slate-300 px-[0.65em] pb-[0.25em] pt-[0.35em] text-center align-baseline text-[0.75em] font-bold leading-none text-info-800">
-                U$S: {data.budget}
+                USD: {data.budget}
               </span>
               {data.location && (
                 <span
@@ -383,7 +383,7 @@ export function ProposalModal({open, handleOpen, data}) {
               <label htmlFor="">Ingrese el monto de su propuesta:</label>
               <input
                 type="number"
-                placeholder="U$S"
+                placeholder="USD"
                 name="totalAmount"
                 value={proposal.totalAmount}
                 className="border-1 mt-1 w-full p-2 rounded-md"
@@ -391,7 +391,7 @@ export function ProposalModal({open, handleOpen, data}) {
               />
               <div className="mt-2 flex justify-start gap-5 ml-2">
                 <div className="text-xs">
-                  <span className="font-bold">(U$S) {serviceAmount}</span>{" "}
+                  <span className="font-bold">(USD) {serviceAmount}</span>{" "}
                   {"  "}
                   <span className="font-bold text-secondary-600">
                     &quot;Energialy&quot;
@@ -399,7 +399,7 @@ export function ProposalModal({open, handleOpen, data}) {
                   ServiceFee ( Fee: entre 2,5% y 0.5%)
                 </div>
                 <div className="text-xs">
-                  <span className="font-bold">(U$S) {receiverAmount}</span>{" "}
+                  <span className="font-bold">(USD) {receiverAmount}</span>{" "}
                   Ingresos que recibirás si tu Propuesta es elegida{" "}
                 </div>
               </div>
