@@ -82,21 +82,23 @@ export default function EditProfile({ option }) {
   const handleSubmit = async (e) => {
     e.preventDefault();
 
-    // Aquí puedes enviar los datos actualizados al servidor
     if (!isEdited) {
       setSubmitError("Debes realizar alguna modificacion.");
       return;
     }
+
+    const accessToken = typeof window !== 'undefined' ? sessionStorage.getItem('accessToken') : null;
+    const authHeader = { Authorization: `Bearer ${accessToken}` };
 
     if (password) {
       try {
         const newPasswordData = { newPassword: password };
         const response = await axios.post(
           `${urlProduction}/users/reset-password/${user.email}`,
-          newPasswordData
+          newPasswordData,
+          { headers: authHeader }
         );
         displaySuccessMessage("Contraseña actualizada con éxito");
-        console.log("Contraseña actualizada:", response);
         setPassword("");
       } catch (error) {
         console.log("Error al actualizar contraseña: ", error);
@@ -105,18 +107,13 @@ export default function EditProfile({ option }) {
     }
 
     if (firstName || lastName) {
-      const updatedData = {
-        firstName,
-        lastName,
-      };
-
       try {
         const response = await axios.put(
           `${urlProduction}/users/${user.id}`,
-          updatedData
+          { firstName, lastName },
+          { headers: authHeader }
         );
         displaySuccessMessage("Cambios guardados con éxito");
-        console.log("Datos actualizados: ", response);
       } catch (error) {
         console.log("Error al actualizar datos: ", error);
         displayFailedMessage("Error al actualizar datos");
@@ -132,12 +129,12 @@ export default function EditProfile({ option }) {
   }, []);
 
   return (
-    <div className="min-h-screen flex flex-col justify-start shadow-md">
+    <div className="flex flex-col justify-start">
       <div className="w-full">
-        <div className="m-15">
+        <div>
           {(!option || option === 0 || typeof option === "undefined") && (
             <form
-              className="m-10 p-8 max-w-[70%] mx-auto"
+              className="w-full max-w-xl mx-auto px-4 py-6 sm:px-8"
               onSubmit={handleSubmit}
             >
               <div className="p-4">
