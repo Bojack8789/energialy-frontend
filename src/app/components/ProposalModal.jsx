@@ -56,11 +56,6 @@ const displayFailedMessage = (mensaje) => {
 
 export function ProposalModal({open, handleOpen, data}) {
 
-  // Validar que data esté definido y tenga company
-  if (!data || !data.company) {
-    return null;
-  }
-
     const [proposal, setProposal] = useState({
       totalAmount: 0,
       projectDuration: "",
@@ -325,6 +320,9 @@ export function ProposalModal({open, handleOpen, data}) {
           });
         }
       }, [data?.id, userData?.company?.id])
+
+  if (!data || !data.company) return null;
+
   return (
     <>
       <div
