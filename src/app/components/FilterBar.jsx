@@ -113,17 +113,15 @@ function FilterBar() {
           </span>
         </div>
         <div>
-          {categoriesLoading && "Loading..."}
-          {/* <AsyncSelect
-            loadOptions={}
-            onChange={handleChangeCategories}
-          /> */}
-          <Select
-            defaultInputValue={"Elige una categoria"}
-            options={optionsCategories}
-            onChange={handleChangeCategories}
-            defaultValue={"todas"}
-          />
+          {categoriesLoading ? (
+            <span className="text-sm text-gray-400">Cargando categorías...</span>
+          ) : (
+            <Select
+              placeholder="Elige una categoria"
+              options={optionsCategories}
+              onChange={handleChangeCategories}
+            />
+          )}
         </div>
       </div>
       <div className="bg-white p-8 mb-4">
@@ -131,8 +129,8 @@ function FilterBar() {
           <h3 className="text-base">Especializaciones</h3>
         </div>
         <div>
-          {categoriesLoading && "Loading..."}
           <Select
+            placeholder="Elige una especialización"
             options={subCatSelected}
             onChange={handleSubcategorieChange}
           />

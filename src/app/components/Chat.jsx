@@ -192,7 +192,27 @@ const Chat = ({ id, company }) => {
           usuariosUnicos.add(item.company.name);
         }
       });
-      const arr = Array.from(usuariosUnicos);
+      let arr = Array.from(usuariosUnicos);
+
+      if (allMessages.length > 0) {
+        const lastMessageTime = new Map();
+        allMessages.forEach((msg) => {
+          const senderCompany = msg.sender?.company?.name || msg.sender?.Company?.name;
+          const receiverCompany = msg.receiver?.company?.name || msg.receiver?.Company?.name;
+          const otherCompany = senderCompany === myName ? receiverCompany : senderCompany;
+          if (!otherCompany) return;
+          const msgTime = new Date(msg.createdAt).getTime() || 0;
+          if (!lastMessageTime.has(otherCompany) || msgTime > lastMessageTime.get(otherCompany)) {
+            lastMessageTime.set(otherCompany, msgTime);
+          }
+        });
+
+        arr.sort((a, b) => {
+          const timeA = lastMessageTime.get(a) || 0;
+          const timeB = lastMessageTime.get(b) || 0;
+          return timeB - timeA;
+        });
+      }
 
       if (company) {
         const button = arr.find((b) => b === company.name);
@@ -203,7 +223,7 @@ const Chat = ({ id, company }) => {
         setButtonChat(arr);
       }
     }
-  }, [allUsers, myName]);
+  }, [allUsers, allMessages, myName]);
 
   useEffect(() => {
     if (!socketIo) return;
