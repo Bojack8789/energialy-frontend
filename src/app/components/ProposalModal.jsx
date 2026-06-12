@@ -264,12 +264,13 @@ export function ProposalModal({open, handleOpen, data}) {
     // }
 
     const handleInput = (e) => {
-      
       const { name, value } = e.target;
-       if(name === "totalAmount") {
-        calculateFee(parseFloat(value), serviceFeePercentage);
-         
-       }
+      if (name === "totalAmount") {
+        const numericValue = parseFloat(value) || 0;
+        calculateFee(numericValue, serviceFeePercentage);
+        setProposal({ ...proposal, [name]: numericValue });
+        return;
+      }
       setProposal({ ...proposal, [name]: value });
     }
 
@@ -385,7 +386,7 @@ export function ProposalModal({open, handleOpen, data}) {
                 type="number"
                 placeholder="USD"
                 name="totalAmount"
-                value={proposal.totalAmount}
+                value={proposal.totalAmount || ""}
                 className="border-1 mt-1 w-full p-2 rounded-md"
                 onChange={handleInput}
               />
@@ -406,7 +407,7 @@ export function ProposalModal({open, handleOpen, data}) {
             </div>
             <label htmlFor="">Duración:</label>
             <Select
-              defaultInputValue={"TIEMPO DE EJECUCIÓN DE LA LICITACION"}
+              placeholder="TIEMPO DE EJECUCIÓN DE LA LICITACION"
               options={optionDuration?.map((duration) => ({
                 value: duration,
                 label: duration,
