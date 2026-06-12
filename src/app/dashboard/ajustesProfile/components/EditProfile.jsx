@@ -55,69 +55,42 @@ export default function EditProfile({ option }) {
 
   const handleInputChange = (e, field) => {
     const value = e.target.value;
-
-    // Verificar si se ha realizado una edición
-    if (value !== user[field]) {
-      setIsEdited(true);
-    } else {
-      setIsEdited(false);
-    }
-
-    // Actualizar el estado local
+    setIsEdited(true);
     switch (field) {
-      case "firstName":
-        setFirstName(value);
-        break;
-      case "lastName":
-        setLastName(value);
-        break;
-      case "password":
-        setPassword(value);
-        break;
-      default:
-        break;
+      case "firstName": setFirstName(value); break;
+      case "lastName":  setLastName(value);  break;
+      case "password":  setPassword(value);  break;
+      default: break;
     }
   };
 
   const handleSubmit = async (e) => {
     e.preventDefault();
+    setSubmitError("");
 
-    if (!isEdited) {
+    if (!isEdited && !password) {
       setSubmitError("Debes realizar alguna modificacion.");
       return;
     }
 
-    const accessToken = typeof window !== 'undefined' ? sessionStorage.getItem('accessToken') : null;
-    const authHeader = { Authorization: `Bearer ${accessToken}` };
+    const updatedData = {};
+    if (firstName !== user.firstName) updatedData.firstName = firstName;
+    if (lastName !== user.lastName)   updatedData.lastName  = lastName;
+    if (password)                     updatedData.hashedPassword = password;
 
-    if (password) {
-      try {
-        const newPasswordData = { newPassword: password };
-        const response = await axios.post(
-          `${urlProduction}/users/reset-password/${user.email}`,
-          newPasswordData,
-          { headers: authHeader }
-        );
-        displaySuccessMessage("Contraseña actualizada con éxito");
-        setPassword("");
-      } catch (error) {
-        console.log("Error al actualizar contraseña: ", error);
-        displayFailedMessage("Error al actualizar contraseña");
-      }
+    if (Object.keys(updatedData).length === 0) {
+      setSubmitError("Debes realizar alguna modificacion.");
+      return;
     }
 
-    if (firstName || lastName) {
-      try {
-        const response = await axios.put(
-          `${urlProduction}/users/${user.id}`,
-          { firstName, lastName },
-          { headers: authHeader }
-        );
-        displaySuccessMessage("Cambios guardados con éxito");
-      } catch (error) {
-        console.log("Error al actualizar datos: ", error);
-        displayFailedMessage("Error al actualizar datos");
-      }
+    try {
+      await axios.put(`${urlProduction}/users/${user.id}`, updatedData);
+      displaySuccessMessage("Cambios guardados con éxito");
+      setPassword("");
+      setIsEdited(false);
+    } catch (error) {
+      console.log("Error al actualizar datos: ", error);
+      displayFailedMessage("Error al guardar los cambios");
     }
   };
 
