@@ -89,14 +89,7 @@ export default function Navigation() {
   // Calcula los links según rol
   const getDesktopLinks = () => {
     if (!user) return null;
-    if (user.role === "superAdmin") return (
-      <>
-        {navLink("/administrador", "Administrador")}
-        {navLink("/directory", "Directorio")}
-        {navLink("/tenders", "Licitaciones")}
-        {user.company?.id && <SubscriptionBadge companyId={user.company.id} />}
-      </>
-    );
+    if (user.role === "superAdmin") return null;
     if (user.company?.id) return (
       <>
         {navLink("/directory", "Directorio")}
@@ -116,18 +109,7 @@ export default function Navigation() {
 
   const getMobileLinks = () => {
     if (!user) return null;
-    if (user.role === "superAdmin") return (
-      <>
-        {mobileNavLink("/administrador", "Administrador")}
-        {mobileNavLink("/directory", "Directorio")}
-        {mobileNavLink("/tenders", "Licitaciones")}
-        {user.company?.id && (
-          <div className="px-4 py-3 border-t border-gray-100">
-            <SubscriptionBadge companyId={user.company.id} />
-          </div>
-        )}
-      </>
-    );
+    if (user.role === "superAdmin") return null;
     if (user.company?.id) return (
       <>
         {mobileNavLink("/directory", "Directorio")}
