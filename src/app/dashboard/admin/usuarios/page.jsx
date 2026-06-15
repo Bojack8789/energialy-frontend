@@ -3,9 +3,10 @@
 import React, { useState, useEffect } from 'react';
 import { TableCard } from '@/app/components/ui';
 import UserFormModal from '@/app/components/SuperAdmin/UserFormModal';
+import TailAdminLayout from '@/app/components/SuperAdmin/TailAdminLayout';
 import UserActions from '@/app/components/SuperAdmin/UserActions';
 
-export default function AdminUsuariosPage() {
+function AdminUsuariosPage() {
   const [users, setUsers] = useState([]);
   const [loading, setLoading] = useState(true);
   const [modalOpen, setModalOpen] = useState(false);
@@ -106,5 +107,13 @@ export default function AdminUsuariosPage() {
       </div>
       <UserFormModal isOpen={modalOpen} onClose={() => setModalOpen(false)} onSave={handleCreate} />
     </div>
+  );
+}
+
+export default function AdminUsuariosPageWrapper() {
+  return (
+    <TailAdminLayout>
+      <AdminUsuariosPage />
+    </TailAdminLayout>
   );
 }

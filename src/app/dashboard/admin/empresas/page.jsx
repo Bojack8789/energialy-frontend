@@ -3,9 +3,10 @@
 import React, { useState, useEffect } from 'react';
 import { TableCard } from '@/app/components/ui';
 import CompanyFormModal from '@/app/components/SuperAdmin/CompanyFormModal';
+import TailAdminLayout from '@/app/components/SuperAdmin/TailAdminLayout';
 import CompanyActions from '@/app/components/SuperAdmin/CompanyActions';
 
-export default function AdminEmpresasPage() {
+function AdminEmpresasPage() {
   const [companies, setCompanies] = useState([]);
   const [loading, setLoading] = useState(true);
   const [modalOpen, setModalOpen] = useState(false);
@@ -109,5 +110,13 @@ export default function AdminEmpresasPage() {
       <TableCard title="Lista de Empresas" data={transformedCompanies} columns={tableColumns} onRowClick={handleRowClick} showSearch={true} showFilter={true} searchPlaceholder="Buscar empresas..." />
       <CompanyFormModal isOpen={modalOpen} onClose={() => setModalOpen(false)} onSave={handleCreate} />
     </div>
+  );
+}
+
+export default function AdminEmpresasPageWrapper() {
+  return (
+    <TailAdminLayout>
+      <AdminEmpresasPage />
+    </TailAdminLayout>
   );
 }

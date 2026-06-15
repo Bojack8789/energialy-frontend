@@ -3,9 +3,10 @@
 import React, { useState, useEffect } from 'react';
 import { TableCard, DonutChartCard, BarChartCard } from '@/app/components/ui';
 import TenderFormModal from '@/app/components/SuperAdmin/TenderFormModal';
+import TailAdminLayout from '@/app/components/SuperAdmin/TailAdminLayout';
 import TenderActions from '@/app/components/SuperAdmin/TenderActions';
 
-export default function AdminLicitacionesPage() {
+function AdminLicitacionesPage() {
   const [tenders, setTenders] = useState([]);
   const [loading, setLoading] = useState(true);
   const [modalOpen, setModalOpen] = useState(false);
@@ -170,5 +171,13 @@ export default function AdminLicitacionesPage() {
 
       <TenderFormModal isOpen={modalOpen} onClose={() => setModalOpen(false)} onSave={handleCreate} />
     </div>
+  );
+}
+
+export default function AdminLicitacionesPageWrapper() {
+  return (
+    <TailAdminLayout>
+      <AdminLicitacionesPage />
+    </TailAdminLayout>
   );
 }
