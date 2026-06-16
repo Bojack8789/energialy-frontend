@@ -185,7 +185,7 @@ function InboxPage() {
 
       if (otherCompany && otherCompany !== myName) {
         const existing = companyLastMessage.get(otherCompany);
-        const msgTime = new Date(msg.createdAt).getTime() || 0;
+        const msgTime = new Date(msg._isoTime || msg.createdAt).getTime() || 0;
         if (!existing || msgTime > existing.time) {
           companyLastMessage.set(otherCompany, { time: msgTime, msg });
         }
@@ -281,11 +281,13 @@ function InboxPage() {
         return;
       }
 
+      const now = new Date().toISOString();
       const newMessage = {
         text: messageText,
         sender,
         receiver,
-        createdAt: convertirFecha(new Date().toISOString()),
+        createdAt: convertirFecha(now),
+        _isoTime: now,
       };
 
       setAllMessages((prev) => [...prev, newMessage]);
