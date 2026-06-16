@@ -132,6 +132,7 @@ const SubscriptionBadge = ({ companyId }) => {
           px-2 sm:px-3 py-1 rounded-full text-xs font-semibold border
           cursor-pointer hover:opacity-80 transition-opacity
           flex items-center gap-1 sm:gap-1.5 whitespace-nowrap
+          min-w-0 max-w-[80px] sm:max-w-none
         `}
         title={`Plan ${plan.name} - Click para ver planes`}
       >

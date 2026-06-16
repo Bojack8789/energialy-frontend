@@ -167,15 +167,20 @@ export default function SideBar() {
         boxShadow: '0 2px 8px rgba(0,0,0,0.1)',
         borderBottom: '1px solid #e2e8f0',
         zIndex: 100,
+        maxWidth: '100vw',
+        overflow: 'hidden',
+        boxSizing: 'border-box',
       }}>
         {/* Logo ENERGIALY */}
-        <Image
-          src={Logo}
-          alt="Energialy"
-          height={36}
-          style={{ width: 'auto', height: 36 }}
-          priority
-        />
+        <div style={{ flexShrink: 0, display: 'flex', alignItems: 'center' }}>
+          <Image
+            src={Logo}
+            alt="Energialy"
+            height={isDesktop ? 36 : 28}
+            style={{ width: 'auto', height: isDesktop ? 36 : 28 }}
+            priority
+          />
+        </div>
 
         {/* Links centrales — Directorio y Licitaciones (ocultos en mobile, van al drawer) */}
         {isDesktop && (
@@ -200,14 +205,18 @@ export default function SideBar() {
         )}
 
         {/* Lado derecho */}
-        <div style={{ display: 'flex', alignItems: 'center', gap: 12, minWidth: 0 }}>
+        <div style={{ display: 'flex', alignItems: 'center', gap: isDesktop ? 12 : 6, minWidth: 0, flexShrink: 1 }}>
 
-          {/* Badge plan — solo si hay empresa */}
-          {user?.company?.id && <SubscriptionBadge companyId={user.company.id} />}
+          {/* Badge plan — solo si hay empresa (puede truncar/encogerse) */}
+          {user?.company?.id && (
+            <div style={{ minWidth: 0, flexShrink: 1, overflow: 'hidden' }}>
+              <SubscriptionBadge companyId={user.company.id} />
+            </div>
+          )}
 
           {/* Avatar + dropdown */}
           {user && (
-            <div style={{ position: 'relative' }} ref={userMenuRef}>
+            <div style={{ position: 'relative', flexShrink: 0 }} ref={userMenuRef}>
               <button
                 onClick={() => setUserMenuOpen(!userMenuOpen)}
                 style={{ background: 'none', border: 'none', cursor: 'pointer', display: 'flex', alignItems: 'center', gap: 8, padding: 4, borderRadius: 8 }}
@@ -216,7 +225,7 @@ export default function SideBar() {
                 <img
                   src={user.company?.profilePicture || defaultAvatar}
                   alt="avatar"
-                  style={{ width: 36, height: 36, borderRadius: '50%', objectFit: 'cover', border: '2px solid #e2e8f0' }}
+                  style={{ width: 36, height: 36, minWidth: 36, minHeight: 36, flexShrink: 0, borderRadius: '50%', objectFit: 'cover', border: '2px solid #e2e8f0' }}
                   onError={e => { e.target.src = defaultAvatar; }}
                 />
                 <span style={{
@@ -277,7 +286,7 @@ export default function SideBar() {
           {!isDesktop && (
             <button
               onClick={() => setDrawerOpen(true)}
-              style={{ background: '#191654', color: '#fff', border: 'none', borderRadius: 8, padding: '8px 10px', cursor: 'pointer', display: 'flex', alignItems: 'center' }}
+              style={{ flexShrink: 0, background: '#191654', color: '#fff', border: 'none', borderRadius: 8, padding: '8px 10px', cursor: 'pointer', display: 'flex', alignItems: 'center' }}
               aria-label="Abrir menú"
             >
               <AiOutlineMenu size={22} />
