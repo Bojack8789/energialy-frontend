@@ -10,7 +10,7 @@ function dateTransform(string) {
   return date;
 }
 
-function DetailCompany({company}) {
+function DetailCompany({ company, hideChat = false }) {
   // Si no hay datos de empresa, crear datos de ejemplo
   const defaultCompany = {
     name: "Empresa Ejemplo",
@@ -118,15 +118,17 @@ function DetailCompany({company}) {
             </p>
           </div>
           
-          {/* Chat integrado */}
-          <div className="bg-white border border-gray-200 rounded-lg shadow-sm p-4">
-            <h3 className="font-bold text-lg mb-4 text-gray-800 border-b border-gray-200 pb-2">
-              💬 Chat con {companyData.name}
-            </h3>
-            <div className="h-[500px] flex flex-col">
-              <Chat id={companyData.id} company={companyData} />
+          {/* Chat integrado (oculto en modo edición de perfil propio) */}
+          {!hideChat && (
+            <div className="bg-white border border-gray-200 rounded-lg shadow-sm p-4">
+              <h3 className="font-bold text-lg mb-4 text-gray-800 border-b border-gray-200 pb-2">
+                💬 Chat con {companyData.name}
+              </h3>
+              <div className="h-[500px] flex flex-col">
+                <Chat id={companyData.id} company={companyData} />
+              </div>
             </div>
-          </div>
+          )}
         </div>
       </div>
     </>

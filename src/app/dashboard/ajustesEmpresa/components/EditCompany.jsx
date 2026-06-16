@@ -176,6 +176,7 @@ export default function EditCompany({ option }) {
   const handleCategoryChange = (e) => {
     const categoryId = e.target.value;
     console.log("categoryId:", categoryId);
+    setIsEdited(true);
     setCategorySelected((prevCategories) => {
       if (prevCategories.includes(categoryId)) {
         return prevCategories.filter((id) => id !== categoryId);
@@ -193,6 +194,7 @@ export default function EditCompany({ option }) {
 
   const handleSubcategoryChange = (e) => {
     const subcategoryId = e.target.value;
+    setIsEdited(true);
     setSubcategorySelected((prevSubcategories) => {
       if (prevSubcategories.includes(subcategoryId)) {
         return prevSubcategories.filter((id) => id !== subcategoryId);
@@ -207,12 +209,8 @@ export default function EditCompany({ option }) {
   const handleInputChange = (e, field) => {
     const value = e.target.value;
 
-    // Verificar si se ha realizado una edición
-    if (value !== user[field]) {
-      setIsEdited(true);
-    } else {
-      setIsEdited(false);
-    }
+    // Cualquier cambio en un campo del formulario habilita el guardado
+    setIsEdited(true);
 
     // Actualizar el estado local
     handleFieldUpdate(field, value);

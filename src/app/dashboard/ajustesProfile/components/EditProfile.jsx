@@ -7,6 +7,7 @@ import "react-toastify/dist/ReactToastify.css";
 import axios from "axios";
 import { setUserData } from "@/app/redux/actions";
 import getLocalStorage from "@/app/Func/localStorage";
+import { getAccessToken } from "@/app/Func/sessionStorage";
 import { urlProduction } from "@/app/data/dataGeneric";
 import { RiEyeLine, RiEyeOffLine } from "react-icons/ri";
 
@@ -46,6 +47,7 @@ export default function EditProfile({ option }) {
   const [firstName, setFirstName] = useState("");
   const [lastName, setLastName] = useState("");
   const [password, setPassword] = useState("");
+  const [confirmPassword, setConfirmPassword] = useState("");
   const [isEdited, setIsEdited] = useState(false);
   const [submitError, setSubmitError] = useState("");
   const [showPassword, setShowPassword] = useState(false);
@@ -60,6 +62,7 @@ export default function EditProfile({ option }) {
       case "firstName": setFirstName(value); break;
       case "lastName":  setLastName(value);  break;
       case "password":  setPassword(value);  break;
+      case "confirmPassword": setConfirmPassword(value); break;
       default: break;
     }
   };
@@ -73,10 +76,21 @@ export default function EditProfile({ option }) {
       return;
     }
 
+    if (password) {
+      if (password.length < 6) {
+        setSubmitError("La contraseña debe tener al menos 6 caracteres.");
+        return;
+      }
+      if (password !== confirmPassword) {
+        setSubmitError("Las contraseñas no coinciden.");
+        return;
+      }
+    }
+
     const updatedData = {};
     if (firstName !== user.firstName) updatedData.firstName = firstName;
     if (lastName !== user.lastName)   updatedData.lastName  = lastName;
-    if (password)                     updatedData.hashedPassword = password;
+    if (password)                     updatedData.password  = password;
 
     if (Object.keys(updatedData).length === 0) {
       setSubmitError("Debes realizar alguna modificacion.");
@@ -84,13 +98,19 @@ export default function EditProfile({ option }) {
     }
 
     try {
-      await axios.put(`${urlProduction}/users/${user.id}`, updatedData);
+      const token = getAccessToken();
+      await axios.put(`${urlProduction}/users/${user.id}`, updatedData, {
+        headers: token ? { Authorization: `Bearer ${token}` } : {},
+      });
       displaySuccessMessage("Cambios guardados con éxito");
       setPassword("");
+      setConfirmPassword("");
       setIsEdited(false);
     } catch (error) {
       console.log("Error al actualizar datos: ", error);
-      displayFailedMessage("Error al guardar los cambios");
+      displayFailedMessage(
+        error.response?.data?.message || "Error al guardar los cambios"
+      );
     }
   };
 
@@ -145,12 +165,13 @@ export default function EditProfile({ option }) {
               </div>
               <div className="p-4">
                 <label className="block mb-2 bg-[#fcfcfc] p-2 border-l-4 border-primary-500">
-                  Contraseña:
+                  Nueva Contraseña:
                 </label>
                 <div className="flex">
                   <input
                     type={showPassword ? "text" : "password"}
                     value={password}
+                    placeholder="Dejar en blanco para no cambiarla"
                     onChange={(e) => handleInputChange(e, "password")}
                     className="w-full px-3 py-2 text-lg rounded border"
                   />
@@ -163,6 +184,19 @@ export default function EditProfile({ option }) {
                   </button>
                 </div>
               </div>
+              {password && (
+                <div className="p-4">
+                  <label className="block mb-2 bg-[#fcfcfc] p-2 border-l-4 border-primary-500">
+                    Confirmar Contraseña:
+                  </label>
+                  <input
+                    type={showPassword ? "text" : "password"}
+                    value={confirmPassword}
+                    onChange={(e) => handleInputChange(e, "confirmPassword")}
+                    className="w-full px-3 py-2 text-lg rounded border"
+                  />
+                </div>
+              )}
               <div className="p-4 flex justify-center">
                 <button
                   onClick={handleSubmit}

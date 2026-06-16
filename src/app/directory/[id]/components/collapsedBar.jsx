@@ -5,7 +5,7 @@ import TendersCompany from "./TendersCompany";
 import GalleryCompany from "./GalleryCompany";
 import CertificationCompany from "./CertificationCompany";
 
-function CollapsedBar({title, company, intState, gallery, certification }) {
+function CollapsedBar({title, company, intState, gallery, certification, hideChat = false }) {
      const [isCollapsed, setIsCollapsed] = useState(intState);
      const toggleCollapse = () => {
     setIsCollapsed(!isCollapsed);
@@ -53,7 +53,7 @@ function CollapsedBar({title, company, intState, gallery, certification }) {
           </button>
         </div>
         <div className={`${isCollapsed ? "hidden" : "block"}`}>
-          {title === 'Compañía' ? <DetailCompany company={company} /> : title === 'Licitaciones' ? <TendersCompany company={company}/> : title === 'Productos/Servicios' ? <GalleryCompany gallery={gallery}/> : title === 'Certificaciones/Homologaciones' ? <CertificationCompany certification={certification}/>: null }
+          {title === 'Compañía' ? <DetailCompany company={company} hideChat={hideChat} /> : title === 'Licitaciones' ? <TendersCompany company={company}/> : title === 'Productos/Servicios' ? <GalleryCompany gallery={gallery}/> : title === 'Certificaciones/Homologaciones' ? <CertificationCompany certification={certification}/>: null }
           
           
         </div>

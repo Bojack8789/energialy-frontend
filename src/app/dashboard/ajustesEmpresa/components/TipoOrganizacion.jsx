@@ -22,7 +22,10 @@ export default function EditCompany() {
   console.log(user);
   const [companyData, setCompanyData] = useState(null);
   const { data: companyInfo, isLoading } = useGetCompaniesByIdQuery(
-    user?.company.id
+    user?.company?.id,
+    {
+      skip: !user?.company?.id,
+    }
   );
   console.log("companyData:", companyInfo);
 
@@ -36,10 +39,13 @@ export default function EditCompany() {
     if (companyInfo) {
       setCompanyData(companyInfo);
       // Establecer los datos de la empresa en los campos del formulario
-      setLocations(companyInfo.locations.id || []);
-      setSubcategories(companyInfo.subcategories || []);
+      // (locations/subcategorySelected son arrays de ids; companyInfo.locations
+      // viene como array de objetos {id, name})
+      setLocations((companyInfo.locations || []).map((loc) => loc.id));
+      setSubcategorySelected(
+        (companyInfo.subcategories || []).map((sub) => sub.id)
+      );
       setOrganizationType(companyInfo.organizationType || "");
-      // ... (establecer otros campos según la estructura de los datos)
     }
   }, [companyInfo]);
 
@@ -118,6 +124,7 @@ export default function EditCompany() {
   const handleCategoryChange = (e) => {
     const categoryId = e.target.value;
     console.log("categoryId:", categoryId);
+    setIsEdited(true);
     setCategorySelected((prevCategories) => {
       if (prevCategories.includes(categoryId)) {
         return prevCategories.filter((id) => id !== categoryId);
@@ -135,6 +142,7 @@ export default function EditCompany() {
 
   const handleSubcategoryChange = (e) => {
     const subcategoryId = e.target.value;
+    setIsEdited(true);
     setSubcategorySelected((prevSubcategories) => {
       if (prevSubcategories.includes(subcategoryId)) {
         return prevSubcategories.filter((id) => id !== subcategoryId);
@@ -149,12 +157,8 @@ export default function EditCompany() {
   const handleInputChange = (e, field) => {
     const value = e.target.value;
 
-    // Verificar si se ha realizado una edición
-    if (value !== user[field]) {
-      setIsEdited(true);
-    } else {
-      setIsEdited(false);
-    }
+    // Cualquier cambio en un campo del formulario habilita el guardado
+    setIsEdited(true);
 
     // Actualizar el estado local
     handleFieldUpdate(field, value);
@@ -205,7 +209,8 @@ export default function EditCompany() {
     }
     if (organizationType.trim() !== "") {
       updatedData.organizationType = organizationType.trim();
-    }    const companyId = getCompanyId(user);
+    }
+    const companyId = getCompanyId(user);
     if (!companyId) {
       console.error("No company ID found, cannot update company data");
       displayFailedMessage("Error: No se pudo obtener la información de la empresa");

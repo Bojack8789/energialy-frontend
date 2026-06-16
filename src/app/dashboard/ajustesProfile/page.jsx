@@ -3,13 +3,13 @@ import React, {useState} from "react";
 import Nav from "../components/Nav";
 import EditProfile from "./components/EditProfile";
 import SubscriptionSection from "./components/SubscriptionSection";
+import ProfileCard from "./components/ProfileCard";
 
 const optionsNav = ["Datos personales", "Mi Plan"];
 
 function PageProfile() {
-  const [selectedOption, setSelectedOption] = useState("");
-  console.log('selectedoption profile:',selectedOption)
-  console.log('optionsnav profile:',optionsNav)
+  // Nav envía el índice numérico de la opción (ver Nav.jsx), no el string
+  const [selectedOption, setSelectedOption] = useState(0);
   const handleOptions = (option) => {
     setSelectedOption(option);
   };
@@ -21,10 +21,17 @@ function PageProfile() {
         <Nav options={optionsNav} onClick={handleOptions} />
       </div>
       <div className="flex-1 p-4 sm:p-6 min-w-0">
-        {selectedOption === "Mi Plan" ? (
+        {selectedOption === 1 ? (
           <SubscriptionSection />
         ) : (
-          <EditProfile option={selectedOption} />
+          <div className="flex flex-col lg:flex-row gap-6 items-start">
+            <div className="w-full lg:w-1/2">
+              <EditProfile option={selectedOption} />
+            </div>
+            <div className="w-full lg:w-1/2">
+              <ProfileCard editable />
+            </div>
+          </div>
         )}
       </div>
     </div>

@@ -75,12 +75,8 @@ export default function DetallesEmpresa() {
   const handleInputChange = (e, field) => {
     const value = e.target.value;
 
-    // Verificar si se ha realizado una edición
-    if (value !== user[field]) {
-      setIsEdited(true);
-    } else {
-      setIsEdited(false);
-    }
+    // Cualquier cambio en un campo del formulario habilita el guardado
+    setIsEdited(true);
 
     // Actualizar el estado local
     handleFieldUpdate(field, value);
@@ -119,7 +115,8 @@ export default function DetallesEmpresa() {
     }
     if (employeeCount.trim() !== "") {
       updatedData.employeeCount = employeeCount.trim();
-    }    const companyId = getCompanyId(user);
+    }
+    const companyId = getCompanyId(user);
     if (!companyId) {
       console.error("No company ID found, cannot update company data");
       displayFailedMessage("Error: No se pudo obtener la información de la empresa");
@@ -183,6 +180,24 @@ export default function DetallesEmpresa() {
                     value={option}
                     checked={employeeCount === option}
                     onChange={(e) => handleInputChange(e, "employeeCount")}
+                  />
+                  <span className="ml-2">{option}</span>
+                </label>
+              </div>
+            ))}
+          </div>
+          <div className="mb-3">
+            <label className="block font-bold mb-2 bg-[#fcfcfc] p-2 border-l-4 border-primary-500">
+              Tipo de Organización
+            </label>
+            {organizationTypes.map((option, index) => (
+              <div key={index} className="mb-2">
+                <label className="flex items-center">
+                  <input
+                    type="radio"
+                    value={option}
+                    checked={organizationType === option}
+                    onChange={(e) => handleInputChange(e, "organizationType")}
                   />
                   <span className="ml-2">{option}</span>
                 </label>

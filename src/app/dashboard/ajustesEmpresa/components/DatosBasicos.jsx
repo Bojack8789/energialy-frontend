@@ -55,12 +55,8 @@ export default function DatosBasicos() {
   const handleInputChange = (e, field) => {
     const value = e.target.value;
 
-    // Verificar si se ha realizado una edición
-    if (value !== user[field]) {
-      setIsEdited(true);
-    } else {
-      setIsEdited(false);
-    }
+    // Cualquier cambio en un campo del formulario habilita el guardado
+    setIsEdited(true);
 
     // Actualizar el estado local
     handleFieldUpdate(field, value);
