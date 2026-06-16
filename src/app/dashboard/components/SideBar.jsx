@@ -83,6 +83,32 @@ export default function SideBar() {
     ? `https://ui-avatars.com/api/?name=${user.firstName}+${user.lastName}&background=c7d2fe&color=3730a3&bold=true`
     : '';
 
+  /* ── Links Directorio/Licitaciones para el drawer mobile ── */
+  const mobileTopLinks = (
+    <ul style={{ listStyle: 'none', padding: 0, margin: '0 0 8px 0', display: 'flex', flexDirection: 'column', gap: 2 }}>
+      <li>
+        <Link
+          href="/directory"
+          style={{ display: 'block', padding: '10px 12px', fontSize: 14, fontWeight: 500, color: '#374151', textDecoration: 'none', borderRadius: 8 }}
+          onMouseEnter={e => { e.currentTarget.style.background = '#f8fafc'; }}
+          onMouseLeave={e => { e.currentTarget.style.background = 'none'; }}
+        >
+          Directorio
+        </Link>
+      </li>
+      <li>
+        <Link
+          href="/tenders"
+          style={{ display: 'block', padding: '10px 12px', fontSize: 14, fontWeight: 500, color: '#374151', textDecoration: 'none', borderRadius: 8 }}
+          onMouseEnter={e => { e.currentTarget.style.background = '#f8fafc'; }}
+          onMouseLeave={e => { e.currentTarget.style.background = 'none'; }}
+        >
+          Licitaciones
+        </Link>
+      </li>
+    </ul>
+  );
+
   /* ── Contenido interior del menú ── */
   const menuContent = (
     <>
@@ -137,7 +163,7 @@ export default function SideBar() {
         display: 'flex',
         alignItems: 'center',
         justifyContent: 'space-between',
-        padding: '0 20px',
+        padding: isDesktop ? '0 20px' : '0 12px',
         boxShadow: '0 2px 8px rgba(0,0,0,0.1)',
         borderBottom: '1px solid #e2e8f0',
         zIndex: 100,
@@ -151,28 +177,30 @@ export default function SideBar() {
           priority
         />
 
-        {/* Links centrales — Directorio y Licitaciones */}
-        <div style={{ display: 'flex', alignItems: 'center', gap: 24 }}>
-          <Link
-            href="/directory"
-            style={{ fontSize: 14, fontWeight: 500, color: '#374151', textDecoration: 'none' }}
-            onMouseEnter={e => { e.currentTarget.style.color = '#191654'; }}
-            onMouseLeave={e => { e.currentTarget.style.color = '#374151'; }}
-          >
-            Directorio
-          </Link>
-          <Link
-            href="/tenders"
-            style={{ fontSize: 14, fontWeight: 500, color: '#374151', textDecoration: 'none' }}
-            onMouseEnter={e => { e.currentTarget.style.color = '#191654'; }}
-            onMouseLeave={e => { e.currentTarget.style.color = '#374151'; }}
-          >
-            Licitaciones
-          </Link>
-        </div>
+        {/* Links centrales — Directorio y Licitaciones (ocultos en mobile, van al drawer) */}
+        {isDesktop && (
+          <div style={{ display: 'flex', alignItems: 'center', gap: 24 }}>
+            <Link
+              href="/directory"
+              style={{ fontSize: 14, fontWeight: 500, color: '#374151', textDecoration: 'none' }}
+              onMouseEnter={e => { e.currentTarget.style.color = '#191654'; }}
+              onMouseLeave={e => { e.currentTarget.style.color = '#374151'; }}
+            >
+              Directorio
+            </Link>
+            <Link
+              href="/tenders"
+              style={{ fontSize: 14, fontWeight: 500, color: '#374151', textDecoration: 'none' }}
+              onMouseEnter={e => { e.currentTarget.style.color = '#191654'; }}
+              onMouseLeave={e => { e.currentTarget.style.color = '#374151'; }}
+            >
+              Licitaciones
+            </Link>
+          </div>
+        )}
 
         {/* Lado derecho */}
-        <div style={{ display: 'flex', alignItems: 'center', gap: 12 }}>
+        <div style={{ display: 'flex', alignItems: 'center', gap: 12, minWidth: 0 }}>
 
           {/* Badge plan — solo si hay empresa */}
           {user?.company?.id && <SubscriptionBadge companyId={user.company.id} />}
@@ -191,7 +219,11 @@ export default function SideBar() {
                   style={{ width: 36, height: 36, borderRadius: '50%', objectFit: 'cover', border: '2px solid #e2e8f0' }}
                   onError={e => { e.target.src = defaultAvatar; }}
                 />
-                <span style={{ fontSize: 13, fontWeight: 500, color: '#374151', maxWidth: 120, overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' }}>
+                <span style={{
+                  display: isDesktop ? 'inline-block' : 'none',
+                  fontSize: 13, fontWeight: 500, color: '#374151',
+                  maxWidth: 120, overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap',
+                }}>
                   {user.company?.name || user.firstName}
                 </span>
                 <svg style={{ width: 14, height: 14, color: '#6b7280', transform: userMenuOpen ? 'rotate(180deg)' : 'none', transition: 'transform 0.2s' }} fill="none" viewBox="0 0 24 24" stroke="currentColor">
@@ -296,7 +328,10 @@ export default function SideBar() {
                       <AiOutlineClose size={20} color="#191654" />
                     </button>
                   </div>
-                  <div style={{ padding: '0 8px' }}>{menuContent}</div>
+                  <div style={{ padding: '0 8px' }}>
+                    {mobileTopLinks}
+                    {menuContent}
+                  </div>
                 </DialogPanel>
               </TransitionChild>
             </div>
