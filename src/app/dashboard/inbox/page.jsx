@@ -168,9 +168,16 @@ function InboxPage() {
       let otherCompany = null;
 
       if (!myName) {
-        // Super admin
-        if (msg.senderId === userId) otherCompany = receiverCompany;
-        else if (msg.receiverId === userId) otherCompany = senderCompany;
+        // Super admin — soporta tanto senderId como sender.id (mensajes locales)
+        const msgSenderId = msg.senderId || msg.sender?.id;
+        const msgReceiverId = msg.receiverId || msg.receiver?.id;
+        if (msgSenderId === userId) {
+          otherCompany = receiverCompany ||
+            `${msg.receiver?.firstName || ''} ${msg.receiver?.lastName || ''}`.trim() ||
+            msg.receiver?.email;
+        } else if (msgReceiverId === userId) {
+          otherCompany = senderCompany;
+        }
       } else {
         if (senderCompany === myName) otherCompany = receiverCompany;
         else if (receiverCompany === myName) otherCompany = senderCompany;
@@ -211,9 +218,17 @@ function InboxPage() {
         const receiverCompany = message.receiver?.company?.name || message.receiver?.Company?.name;
 
         if (!myName) {
+          const msgSenderId = message.senderId || message.sender?.id;
+          const msgReceiverId = message.receiverId || message.receiver?.id;
+          const receiverName = receiverCompany ||
+            `${message.receiver?.firstName || ''} ${message.receiver?.lastName || ''}`.trim() ||
+            message.receiver?.email;
+          const senderName = senderCompany ||
+            `${message.sender?.firstName || ''} ${message.sender?.lastName || ''}`.trim() ||
+            message.sender?.email;
           return (
-            (message.senderId === userId && receiverCompany === selectedCompany) ||
-            (senderCompany === selectedCompany && message.receiverId === userId)
+            (msgSenderId === userId && (receiverName === selectedCompany || msgReceiverId === receiver?.id)) ||
+            (senderName === selectedCompany && msgReceiverId === userId)
           );
         }
 
@@ -226,7 +241,7 @@ function InboxPage() {
     } else {
       setFilteredMessages([]);
     }
-  }, [selectedCompany, allUsers, allMessages, myName]);
+  }, [selectedCompany, allUsers, allMessages, myName, receiver, userId]);
 
   // Recibir mensajes por socket
   useEffect(() => {
