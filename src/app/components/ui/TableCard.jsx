@@ -67,11 +67,11 @@ const TableCard = ({
   return (
     <div className={`rounded-sm border border-stroke bg-white px-5 pt-6 pb-2.5 shadow-default dark:border-strokedark dark:bg-boxdark sm:px-7.5 xl:pb-1 ${className}`}>
       <div className="flex flex-col">
-        <div className="flex flex-wrap items-center justify-between gap-3 sm:flex-nowrap mb-6">
+        <div className="flex flex-wrap items-center justify-between gap-3 mb-6">
           <h4 className="text-xl font-semibold text-black dark:text-white">
             {title}
           </h4>
-          <div className="flex items-center gap-3">
+          <div className="flex flex-wrap items-center gap-3">
             {showSearch && (
               <div className="relative">
                 <input
@@ -79,9 +79,9 @@ const TableCard = ({
                   placeholder={searchPlaceholder}
                   value={searchTerm}
                   onChange={(e) => setSearchTerm(e.target.value)}
-                  className="w-full rounded border border-stroke bg-gray py-3 pl-11.5 pr-4.5 text-black focus:border-primary focus-visible:outline-none dark:border-strokedark dark:bg-meta-4 dark:text-white dark:focus:border-primary"
+                  className="w-full rounded border border-stroke bg-gray py-2 pl-10 pr-4 text-sm text-black focus:border-primary focus-visible:outline-none dark:border-strokedark dark:bg-meta-4 dark:text-white dark:focus:border-primary"
                 />
-                <span className="absolute left-4 top-4">
+                <span className="absolute left-3 top-2.5">
                   <svg
                     className="fill-body hover:fill-primary dark:fill-bodydark dark:hover:fill-primary"
                     width="20"
@@ -130,14 +130,14 @@ const TableCard = ({
           </div>
         </div>
 
-        <div className="max-w-full overflow-x-auto">
+        <div className="w-full overflow-x-auto">
           <table className="w-full table-auto">
             <thead>
               <tr className="bg-gray-2 text-left dark:bg-meta-4">
                 {columns && columns.length > 0 && columns.map((column, index) => (
                   <th
                     key={index}
-                    className="min-w-[220px] px-4 py-4 font-medium text-black dark:text-white xl:pl-11"
+                    className="px-4 py-3 text-xs font-semibold uppercase tracking-wider text-gray-600 dark:text-white whitespace-nowrap"
                   >
                     {column.header}
                   </th>
@@ -148,15 +148,13 @@ const TableCard = ({
               {paginatedData && paginatedData.length > 0 && paginatedData.map((row, rowIndex) => (
                 <tr
                   key={rowIndex}
-                  className={`cursor-pointer hover:bg-gray-2 dark:hover:bg-meta-4 ${
-                    onRowClick ? 'cursor-pointer' : ''
-                  }`}
+                  className={`hover:bg-gray-2 dark:hover:bg-meta-4 ${onRowClick ? 'cursor-pointer' : ''}`}
                   onClick={() => onRowClick && onRowClick(row)}
                 >
                   {columns && columns.length > 0 && columns.map((column, colIndex) => (
                     <td
                       key={colIndex}
-                      className="border-b border-[#eee] px-4 py-5 pl-9 dark:border-strokedark xl:pl-11"
+                      className="border-b border-[#eee] px-4 py-3 dark:border-strokedark text-sm"
                     >
                       {renderCellContent(row[column.accessor], column, row)}
                     </td>

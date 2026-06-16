@@ -1,6 +1,7 @@
 "use client";
 
 import React, { useState } from 'react';
+import { MdEdit, MdDelete, MdPlayArrow, MdPause, MdDiamond } from 'react-icons/md';
 import CompanyFormModal from './CompanyFormModal';
 
 const CompanyActions = ({ company, onUpdate, onDelete }) => {
@@ -9,21 +10,14 @@ const CompanyActions = ({ company, onUpdate, onDelete }) => {
   const [deleting, setDeleting] = useState(false);
 
   const handleDelete = async () => {
-    if (!confirm(`¿Estás seguro de eliminar la empresa "${company.name}"?`)) {
-      return;
-    }
-
+    if (!confirm(`¿Estás seguro de eliminar la empresa "${company.name}"?`)) return;
     setDeleting(true);
     try {
       const token = sessionStorage.getItem('accessToken');
       const response = await fetch(
         `${process.env.NEXT_PUBLIC_BASE_URL}/admin/companies/${company.id}`,
-        {
-          method: 'DELETE',
-          headers: { Authorization: `Bearer ${token}` }
-        }
+        { method: 'DELETE', headers: { Authorization: `Bearer ${token}` } }
       );
-
       if (response.ok) {
         onDelete(company.id);
         alert('Empresa eliminada exitosamente');
@@ -46,14 +40,10 @@ const CompanyActions = ({ company, onUpdate, onDelete }) => {
         `${process.env.NEXT_PUBLIC_BASE_URL}/admin/companies/${company.id}/status`,
         {
           method: 'PATCH',
-          headers: {
-            'Content-Type': 'application/json',
-            Authorization: `Bearer ${token}`
-          },
+          headers: { 'Content-Type': 'application/json', Authorization: `Bearer ${token}` },
           body: JSON.stringify({ isActive: !company.isActive })
         }
       );
-
       if (response.ok) {
         const data = await response.json();
         onUpdate(data.company);
@@ -75,14 +65,10 @@ const CompanyActions = ({ company, onUpdate, onDelete }) => {
         `${process.env.NEXT_PUBLIC_BASE_URL}/admin/companies/${company.id}`,
         {
           method: 'PUT',
-          headers: {
-            'Content-Type': 'application/json',
-            Authorization: `Bearer ${token}`
-          },
+          headers: { 'Content-Type': 'application/json', Authorization: `Bearer ${token}` },
           body: JSON.stringify({ subscription: newSubscription })
         }
       );
-
       if (response.ok) {
         const data = await response.json();
         onUpdate(data.company);
@@ -100,42 +86,45 @@ const CompanyActions = ({ company, onUpdate, onDelete }) => {
 
   return (
     <>
-      <div className="flex gap-2">
+      <div className="flex gap-1.5">
         <button
           onClick={() => setModalOpen(true)}
-          className="px-3 py-1 text-sm bg-blue-500 text-white rounded hover:bg-blue-600"
+          className="inline-flex items-center gap-1 px-2.5 py-1.5 text-xs font-medium bg-blue-50 text-blue-700 border border-blue-200 rounded hover:bg-blue-100 transition-colors"
           title="Editar"
         >
-          ✏️ Editar
+          <MdEdit size={14} /> Editar
         </button>
 
         <button
           onClick={() => setSubscriptionModalOpen(true)}
-          className="px-3 py-1 text-sm bg-purple-500 text-white rounded hover:bg-purple-600"
+          className="inline-flex items-center gap-1 px-2.5 py-1.5 text-xs font-medium bg-purple-50 text-purple-700 border border-purple-200 rounded hover:bg-purple-100 transition-colors"
           title="Cambiar Plan"
         >
-          💎 Plan
+          <MdDiamond size={14} /> Plan
         </button>
 
         <button
           onClick={handleToggleStatus}
-          className={`px-3 py-1 text-sm rounded ${
+          className={`inline-flex items-center gap-1 px-2.5 py-1.5 text-xs font-medium rounded border transition-colors ${
             company.isActive
-              ? 'bg-yellow-500 text-white hover:bg-yellow-600'
-              : 'bg-green-500 text-white hover:bg-green-600'
+              ? 'bg-yellow-50 text-yellow-700 border-yellow-200 hover:bg-yellow-100'
+              : 'bg-green-50 text-green-700 border-green-200 hover:bg-green-100'
           }`}
           title={company.isActive ? 'Pausar' : 'Activar'}
         >
-          {company.isActive ? '⏸️ Pausar' : '▶️ Activar'}
+          {company.isActive
+            ? <><MdPause size={14} /> Pausar</>
+            : <><MdPlayArrow size={14} /> Activar</>
+          }
         </button>
 
         <button
           onClick={handleDelete}
           disabled={deleting}
-          className="px-3 py-1 text-sm bg-red-500 text-white rounded hover:bg-red-600 disabled:opacity-50"
+          className="inline-flex items-center gap-1 px-2.5 py-1.5 text-xs font-medium bg-red-50 text-red-700 border border-red-200 rounded hover:bg-red-100 transition-colors disabled:opacity-50"
           title="Eliminar"
         >
-          {deleting ? '...' : '🗑️ Eliminar'}
+          <MdDelete size={14} /> {deleting ? 'Eliminando...' : 'Eliminar'}
         </button>
       </div>
 
@@ -143,57 +132,36 @@ const CompanyActions = ({ company, onUpdate, onDelete }) => {
         isOpen={modalOpen}
         onClose={() => setModalOpen(false)}
         company={company}
-        onSave={(updated) => {
-          onUpdate(updated);
-          setModalOpen(false);
-        }}
+        onSave={(updated) => { onUpdate(updated); setModalOpen(false); }}
       />
 
       {subscriptionModalOpen && (
         <div className="fixed inset-0 z-[9999] flex items-center justify-center bg-black bg-opacity-50">
           <div className="bg-white rounded-lg shadow-xl w-full max-w-md p-6">
-            <h2 className="text-xl font-semibold mb-4 text-black">
-              Cambiar Plan de Suscripción
-            </h2>
-
+            <h2 className="text-xl font-semibold mb-4 text-black">Cambiar Plan de Suscripción</h2>
             <div className="mb-4 p-3 bg-gray-50 rounded">
-              <p className="text-sm text-gray-600">
-                <strong>Empresa:</strong> {company.name}
-              </p>
-              <p className="text-sm text-gray-600">
-                <strong>Plan actual:</strong> {company.subscription || 'free'}
-              </p>
+              <p className="text-sm text-gray-600"><strong>Empresa:</strong> {company.name}</p>
+              <p className="text-sm text-gray-600"><strong>Plan actual:</strong> {company.subscription || 'free'}</p>
             </div>
-
             <div className="mb-4">
-              <label className="block text-sm font-medium text-gray-700 mb-2">
-                Seleccionar Nuevo Plan
-              </label>
+              <label className="block text-sm font-medium text-gray-700 mb-2">Seleccionar Nuevo Plan</label>
               <div className="space-y-2">
-                <button
-                  onClick={() => handleSubscriptionChange('free')}
-                  className="w-full px-4 py-3 text-left border rounded hover:bg-gray-50 text-black"
-                >
-                  <div className="font-semibold">GRATIS - $0.00/mes</div>
-                  <div className="text-xs text-gray-500">Publicar licitaciones públicas, máx 3 propuestas activas</div>
-                </button>
-                <button
-                  onClick={() => handleSubscriptionChange('base')}
-                  className="w-full px-4 py-3 text-left border rounded hover:bg-gray-50 text-black"
-                >
-                  <div className="font-semibold">BASE - $49.00/mes</div>
-                  <div className="text-xs text-gray-500">Máx 30 propuestas, licitaciones privadas, ocultar presupuesto</div>
-                </button>
-                <button
-                  onClick={() => handleSubscriptionChange('plus')}
-                  className="w-full px-4 py-3 text-left border rounded hover:bg-gray-50 text-black"
-                >
-                  <div className="font-semibold">PLUS - $69.00/mes</div>
-                  <div className="text-xs text-gray-500">Propuestas ilimitadas, destacado en directorio, todas las funcionalidades</div>
-                </button>
+                {[
+                  { key: 'free', label: 'GRATIS', price: '$0.00/mes', desc: 'Publicar licitaciones públicas, máx 3 propuestas activas' },
+                  { key: 'base', label: 'BASE', price: '$49.00/mes', desc: 'Máx 30 propuestas, licitaciones privadas, ocultar presupuesto' },
+                  { key: 'plus', label: 'PLUS', price: '$69.00/mes', desc: 'Propuestas ilimitadas, destacado en directorio, todas las funcionalidades' },
+                ].map(plan => (
+                  <button
+                    key={plan.key}
+                    onClick={() => handleSubscriptionChange(plan.key)}
+                    className="w-full px-4 py-3 text-left border rounded hover:bg-gray-50 text-black"
+                  >
+                    <div className="font-semibold">{plan.label} — {plan.price}</div>
+                    <div className="text-xs text-gray-500">{plan.desc}</div>
+                  </button>
+                ))}
               </div>
             </div>
-
             <div className="flex gap-2 justify-end">
               <button
                 onClick={() => setSubscriptionModalOpen(false)}

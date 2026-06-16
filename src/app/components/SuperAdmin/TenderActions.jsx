@@ -1,6 +1,7 @@
 "use client";
 
 import React, { useState } from 'react';
+import { MdEdit, MdDelete, MdPublish, MdCancel } from 'react-icons/md';
 import TenderFormModal from './TenderFormModal';
 
 export default function TenderActions({ tender, onUpdate, onDelete }) {
@@ -64,32 +65,37 @@ export default function TenderActions({ tender, onUpdate, onDelete }) {
 
   return (
     <>
-      <div className="flex items-center gap-2">
+      <div className="flex items-center gap-1.5">
         <button
           onClick={() => setShowEditModal(true)}
           disabled={loading}
-          className="rounded bg-blue-500 px-3 py-1 text-sm text-white hover:bg-blue-600 disabled:opacity-50"
+          className="inline-flex items-center gap-1 px-2.5 py-1.5 text-xs font-medium bg-blue-50 text-blue-700 border border-blue-200 rounded hover:bg-blue-100 transition-colors disabled:opacity-50"
           title="Editar"
         >
-          Editar
+          <MdEdit size={14} /> Editar
         </button>
         <button
           onClick={handleToggleStatus}
           disabled={loading}
-          className={`rounded px-3 py-1 text-sm text-white disabled:opacity-50 ${
-            tender.status === 'published' ? 'bg-yellow-500 hover:bg-yellow-600' : 'bg-green-500 hover:bg-green-600'
+          className={`inline-flex items-center gap-1 px-2.5 py-1.5 text-xs font-medium rounded border transition-colors disabled:opacity-50 ${
+            tender.status === 'published'
+              ? 'bg-yellow-50 text-yellow-700 border-yellow-200 hover:bg-yellow-100'
+              : 'bg-green-50 text-green-700 border-green-200 hover:bg-green-100'
           }`}
           title={tender.status === 'published' ? 'Cancelar' : 'Publicar'}
         >
-          {tender.status === 'published' ? 'Cancelar' : 'Publicar'}
+          {tender.status === 'published'
+            ? <><MdCancel size={14} /> Cancelar</>
+            : <><MdPublish size={14} /> Publicar</>
+          }
         </button>
         <button
           onClick={handleDelete}
           disabled={loading}
-          className="rounded bg-red-500 px-3 py-1 text-sm text-white hover:bg-red-600 disabled:opacity-50"
+          className="inline-flex items-center gap-1 px-2.5 py-1.5 text-xs font-medium bg-red-50 text-red-700 border border-red-200 rounded hover:bg-red-100 transition-colors disabled:opacity-50"
           title="Eliminar"
         >
-          Eliminar
+          <MdDelete size={14} /> Eliminar
         </button>
       </div>
 
