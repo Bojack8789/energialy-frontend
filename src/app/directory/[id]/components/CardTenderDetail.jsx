@@ -9,7 +9,7 @@ import { useRouter } from "next/navigation";
 const CardTender = ({item}) => {
   
   const router = useRouter();
-  const tenders = item.tenders
+  const tenders = item?.tenders
   
 
     useEffect(() => {

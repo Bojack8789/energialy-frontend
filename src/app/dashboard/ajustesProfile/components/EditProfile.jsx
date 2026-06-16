@@ -87,6 +87,11 @@ export default function EditProfile({ option }) {
       }
     }
 
+    if (!user) {
+      setSubmitError("No se pudo cargar tu usuario. Recargá la página.");
+      return;
+    }
+
     const updatedData = {};
     if (firstName !== user.firstName) updatedData.firstName = firstName;
     if (lastName !== user.lastName)   updatedData.lastName  = lastName;
@@ -116,9 +121,10 @@ export default function EditProfile({ option }) {
 
   useEffect(() => {
     const user = getLocalStorage();
+    if (!user) return;
     setUser(user);
-    setFirstName(user.firstName);
-    setLastName(user.lastName);
+    setFirstName(user.firstName || "");
+    setLastName(user.lastName || "");
   }, []);
 
   return (
