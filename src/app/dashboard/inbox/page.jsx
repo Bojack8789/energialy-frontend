@@ -109,8 +109,16 @@ function InboxPage() {
     axiosGetAllMessages(setAllMessages);
   }, []);
 
-  // Cargar sender
+  // Cargar sender — si es admin (sin company) usar datos del localStorage directamente
   useEffect(() => {
+    const localUser = getLocalStorage();
+    const isAdmin = localUser?.role === 'superAdmin' || localUser?.role === 'admin';
+
+    if (isAdmin && localUser) {
+      setSender(localUser);
+      return;
+    }
+
     if (allUsers.length > 0) {
       const foundSender = companyId
         ? allUsers.find((u) => u.company?.id === companyId)
@@ -119,23 +127,30 @@ function InboxPage() {
     }
   }, [allUsers, companyId]);
 
-  // Construir lista de TODAS las empresas del sistema (menos la propia)
+  // Construir lista de TODOS los contactos (empresas + usuarios sin empresa para admin)
   useEffect(() => {
     if (allUsers.length > 0) {
-      const companies = [];
+      const localUser = getLocalStorage();
+      const isAdmin = localUser?.role === 'superAdmin' || localUser?.role === 'admin';
+      const contacts = [];
       const seen = new Set();
+
       allUsers.forEach((u) => {
         if (u.company?.name && u.company.name !== myName && !seen.has(u.company.name)) {
           seen.add(u.company.name);
-          companies.push({
-            name: u.company.name,
-            profilePicture: u.company.profilePicture || null,
-          });
+          contacts.push({ name: u.company.name, profilePicture: u.company.profilePicture || null, userId: u.id });
+        } else if (isAdmin && !u.company && u.id !== userId) {
+          // Admin ve también usuarios sin empresa, identificados por nombre completo
+          const displayName = `${u.firstName || ''} ${u.lastName || ''}`.trim() || u.email;
+          if (!seen.has(displayName)) {
+            seen.add(displayName);
+            contacts.push({ name: displayName, profilePicture: null, userId: u.id, noCompany: true });
+          }
         }
       });
-      setAllCompanies(companies);
+      setAllCompanies(contacts);
     }
-  }, [allUsers, myName]);
+  }, [allUsers, myName, userId]);
 
   // Construir lista de empresas con CONVERSACIÓN (ordenadas por último mensaje)
   useEffect(() => {
@@ -182,8 +197,11 @@ function InboxPage() {
   useEffect(() => {
     if (!selectedCompany || allUsers.length === 0) return;
 
+    // Buscar por empresa o por nombre completo (usuarios sin empresa)
     const newReceiver = allUsers.find(
       (u) => u.company?.name === selectedCompany
+    ) || allUsers.find(
+      (u) => `${u.firstName || ''} ${u.lastName || ''}`.trim() === selectedCompany || u.email === selectedCompany
     );
     if (newReceiver) setReceiver(newReceiver);
 
@@ -240,11 +258,11 @@ function InboxPage() {
       if (!socketIo || !messageText.trim()) return;
 
       if (!selectedCompany) {
-        alert("Por favor, selecciona una empresa para enviar el mensaje.");
+        alert("Por favor, selecciona un contacto para enviar el mensaje.");
         return;
       }
-      if (!receiver || !receiver.company) {
-        alert("Error de conexión. Por favor, vuelve a seleccionar la empresa.");
+      if (!receiver) {
+        alert("Error de conexión. Por favor, vuelve a seleccionar el contacto.");
         return;
       }
 
@@ -257,10 +275,13 @@ function InboxPage() {
 
       setAllMessages((prev) => [...prev, newMessage]);
 
+      // Para usuarios sin empresa usar su id directamente
+      const receiverSocketId = receiver.company?.id || receiver.id;
+
       socketIo.emit("sendMessage", {
         _message: messageText,
         _sender: companyId || userId,
-        _receiver: receiver.company.id,
+        _receiver: receiverSocketId,
       });
 
       try {

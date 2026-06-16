@@ -67,7 +67,10 @@ export async function axiosGetAllUsers(setAllUsers) {
       }
     );
     // console.log("get-users:", data);
-    const usersWithCompany = data.filter(user=>user.company!==null);
+    // Admins ven todos los usuarios; el resto solo ve usuarios con empresa
+    const localUser = (() => { try { return JSON.parse(sessionStorage.getItem('user')); } catch { return null; } })();
+    const isAdmin = localUser?.role === 'superAdmin' || localUser?.role === 'admin';
+    const usersWithCompany = isAdmin ? data : data.filter(user => user.company !== null);
     setAllUsers(usersWithCompany);
   } catch (error) {
     console.log("Error en axiosGetAllUsers por:", error.response?.data || error.message);

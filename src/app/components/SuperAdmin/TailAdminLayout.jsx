@@ -16,7 +16,7 @@ const adminItems = [
   { label: 'Administrar Usuarios', route: '/dashboard/admin/usuarios', icon: <MdPeople size={22} /> },
   { label: 'Administrar Empresas', route: '/dashboard/admin/empresas', icon: <MdBusiness size={22} /> },
   { label: 'Administrar Licitaciones', route: '/dashboard/admin/licitaciones', icon: <MdDescription size={22} /> },
-  { label: 'Chat', route: '/dashboard/inbox', icon: <MdChat size={22} /> },
+  { label: 'Chat', route: '/dashboard/admin/chat', icon: <MdChat size={22} /> },
 ];
 
 export default function TailAdminLayout({ children }) {

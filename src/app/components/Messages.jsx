@@ -54,9 +54,10 @@ const Messages = ({ filteredMessages, userId }) => {
         <>
           {filteredMessages.map((message, index) => {
             const isSender = message.sender.id === userId;
-            const userName =
-              message.sender.fullName ||
-              `${message.sender.firstName} ${message.sender.lastName}`;
+            const isAdmin = message.sender.role === 'superAdmin' || message.sender.role === 'admin';
+            const userName = isAdmin
+              ? 'Administrador Energialy'
+              : (message.sender.fullName || `${message.sender.firstName} ${message.sender.lastName}`);
 
             const showAvatar =
               index === 0 ||
@@ -75,8 +76,11 @@ const Messages = ({ filteredMessages, userId }) => {
                 {/* Avatar */}
                 <div className="flex-shrink-0 w-8 h-8">
                   {showAvatar && !isSender && (
-                    <div className="w-8 h-8 rounded-full bg-gradient-to-br from-gray-400 to-gray-600 flex items-center justify-center text-white font-semibold text-xs shadow-md">
-                      {userName.charAt(0).toUpperCase()}
+                    <div
+                      className="w-8 h-8 rounded-full flex items-center justify-center text-white font-semibold text-xs shadow-md"
+                      style={{ background: isAdmin ? '#191654' : 'linear-gradient(135deg, #9ca3af, #4b5563)' }}
+                    >
+                      {isAdmin ? 'AE' : userName.charAt(0).toUpperCase()}
                     </div>
                   )}
                 </div>
