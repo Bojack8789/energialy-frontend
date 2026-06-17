@@ -41,7 +41,8 @@ const tendersReducer = createSlice({
         state.filterTenders = [...state.tenders];
       } else {
         state.filterTenders = state.tenders.filter((tender) =>
-          tender.subcategories?.some((subcat) => subcat.CategoryId === action.payload)
+          // eslint-disable-next-line eqeqeq
+          tender.subcategories?.some((subcat) => subcat.CategoryId == action.payload)
         );
       }
     },
@@ -50,7 +51,8 @@ const tendersReducer = createSlice({
         state.filterTenders = [...state.tenders];
       } else {
         state.filterTenders = state.tenders.filter((tender) =>
-          tender.subcategories?.some((subcat) => subcat.id === action.payload)
+          // eslint-disable-next-line eqeqeq
+          tender.subcategories?.some((subcat) => subcat.id == action.payload)
         );
       }
     },
