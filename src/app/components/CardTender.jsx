@@ -25,41 +25,73 @@ const CardTender = ({item, isOwn}) => {
 
   return (
     <>
-    <div className={`rounded-lg bg-white p-4 sm:p-6 shadow-[0_2px_15px_-3px_rgba(0,0,0,0.07),0_10px_20px_-2px_rgba(0,0,0,0.04)] dark:bg-neutral-700 w-full mb-4 flex flex-col md:flex-row justify-between gap-4 ${isOwn ? 'border-2 border-primary-300' : ''}`}>
-      <div className="flex-1">
-        <div className="flex items-center gap-3 mb-3 flex-wrap">
-          <span className={`inline-block whitespace-nowrap rounded-[0.27rem] p-3 text-center align-baseline text-base font-bold leading-none ${isOwn ? 'bg-primary-600 text-white' : 'bg-primary-100 text-primary-700'}`}>
+    <div className={`rounded-lg bg-white p-4 sm:p-6 shadow-[0_2px_15px_-3px_rgba(0,0,0,0.07),0_10px_20px_-2px_rgba(0,0,0,0.04)] dark:bg-neutral-700 w-full mb-4 flex flex-col md:flex-row md:items-start gap-4 ${isOwn ? 'border-2 border-primary-300' : ''}`}>
+
+      {/* Contenido principal */}
+      <div className="flex-1 min-w-0">
+
+        {/* Empresa + badges de presupuesto y ubicación en la misma fila */}
+        <div className="flex flex-wrap items-center gap-2 mb-3">
+          <span className={`shrink-0 rounded-[0.27rem] px-3 py-1.5 text-sm font-bold leading-none ${isOwn ? 'bg-primary-600 text-white' : 'bg-primary-100 text-primary-700'}`}>
             {item.company?.name}
-            {isOwn && <span className="ml-2 text-xs font-normal opacity-90">(Mi empresa)</span>}
+            {isOwn && <span className="ml-1.5 text-xs font-normal opacity-90">(Mi empresa)</span>}
           </span>
+
           {item.company?.id && !isOwn && (
             <button
               type="button"
-              className="inline-block rounded bg-gray-100 border border-gray-300 px-3 py-1.5 text-xs font-medium text-gray-700 hover:bg-gray-200 transition-colors"
+              className="shrink-0 rounded bg-gray-100 border border-gray-300 px-3 py-1.5 text-xs font-medium text-gray-700 hover:bg-gray-200 transition-colors"
               onClick={() => setShowProfile(true)}
             >
               Ver Perfil
             </button>
           )}
-        </div>
-        <h5 className="mb-2 text-xl font-semibold leading-tight text-neutral-800 dark:text-neutral-50">
-          {item.title}
-        </h5>
-        <FormattedString content={item.description} />
-        <div className="w-full mb-3 flex flex-wrap justify-start gap-2 sm:gap-3">
-          {item.subcategories.map((sub, index) => (
-            <span key={index} className="inline-block whitespace-nowrap rounded-full bg-neutral-200 px-2 py-1.5 sm:p-3 text-center align-baseline text-[0.70em] font-bold leading-none text-neutral-600">
-              {sub.name}
+
+          {/* Presupuesto */}
+          <span className="shrink-0 rounded-[0.27rem] bg-info-100 px-3 py-1.5 text-xs font-bold leading-none text-info-800">
+            {item.showBudget ? `USD ${item.budget?.toLocaleString()}` : 'Presupuesto no disponible'}
+          </span>
+
+          {/* Ubicación */}
+          {item.location && (
+            <span className={`shrink-0 rounded-[0.27rem] px-3 py-1.5 text-xs font-bold leading-none ${
+              item.location.id === "e8bbe98e-a725-44bb-b7d8-990013794f5c"
+                ? "bg-success-100 text-success-700"
+                : item.location.id === "9a83f3bb-0472-4e7e-bb67-9c8bdf996cd3"
+                ? "bg-danger-100 text-danger-700"
+                : "bg-neutral-200 text-neutral-700"
+            }`}>
+              {item.location.name}
             </span>
-          ))}
+          )}
         </div>
 
-        <div className="flex gap-2 flex-wrap">
+        {/* Título */}
+        <h5 className="mb-2 text-lg font-semibold leading-snug text-neutral-800 dark:text-neutral-50">
+          {item.title}
+        </h5>
+
+        {/* Descripción */}
+        <div className="mb-3 text-sm text-neutral-600 dark:text-neutral-300 line-clamp-3">
+          <FormattedString content={item.description} />
+        </div>
+
+        {/* Subcategorías */}
+        {item.subcategories?.length > 0 && (
+          <div className="flex flex-wrap gap-1.5 mb-4">
+            {item.subcategories.map((sub, index) => (
+              <span key={index} className="rounded-full bg-neutral-200 px-2.5 py-1 text-[0.70em] font-bold leading-none text-neutral-600">
+                {sub.name}
+              </span>
+            ))}
+          </div>
+        )}
+
+        {/* Botones */}
+        <div className="flex flex-wrap gap-2">
           <button
             type="button"
-            className="inline-block rounded bg-primary-800 px-4 sm:px-6 pb-2 pt-2.5 text-xs font-medium uppercase leading-normal text-white shadow-[0_4px_9px_-4px_#3b71ca] transition duration-150 ease-in-out hover:bg-primary-600 hover:shadow-[0_8px_9px_-4px_rgba(59,113,202,0.3),0_4px_18px_0_rgba(59,113,202,0.2)] focus:outline-none focus:ring-0 active:bg-primary-700 dark:shadow-[0_4px_9px_-4px_rgba(59,113,202,0.5)]"
-            data-te-ripple-init
-            data-te-ripple-color="light"
+            className="rounded bg-primary-800 px-5 py-2 text-xs font-medium uppercase leading-normal text-white shadow-[0_4px_9px_-4px_#3b71ca] transition duration-150 ease-in-out hover:bg-primary-600 focus:outline-none active:bg-primary-700"
             onClick={() => router.push(`/tenders/${item.id}`)}
           >
             Ver Licitación
@@ -67,37 +99,13 @@ const CardTender = ({item, isOwn}) => {
           {isOwn && (
             <button
               type="button"
-              className="inline-block rounded bg-green-600 px-4 sm:px-6 pb-2 pt-2.5 text-xs font-medium uppercase leading-normal text-white transition duration-150 ease-in-out hover:bg-green-700 focus:outline-none focus:ring-0"
+              className="rounded bg-green-600 px-5 py-2 text-xs font-medium uppercase leading-normal text-white transition duration-150 ease-in-out hover:bg-green-700 focus:outline-none"
               onClick={() => router.push(`/tenders/${item.id}`)}
             >
-              Promocionar Licitación
+              Promocionar
             </button>
           )}
         </div>
-      </div>
-      <div className="w-full md:w-auto flex flex-row md:flex-col items-start md:items-center gap-2 sm:gap-3">
-        {item.showBudget ? (
-          <span className="inline-block whitespace-nowrap rounded-[0.27rem] bg-info-100 px-[0.65em] pb-[0.25em] pt-[0.35em] text-center align-baseline text-[0.75em] font-bold leading-none text-info-800">
-            USD: {item.budget}
-          </span>
-        ) : (
-          <span className="inline-block whitespace-nowrap rounded-[0.27rem] bg-info-100 px-[0.65em] pb-[0.25em] pt-[0.35em] text-center align-baseline text-[0.75em] font-bold leading-none text-info-800">
-            No disponible
-          </span>
-        )}
-        {item.location && (
-          <span
-            className={`${
-              item.location.id === "e8bbe98e-a725-44bb-b7d8-990013794f5c"
-                ? "bg-success-100 text-success-700"
-                : item.location.id === "9a83f3bb-0472-4e7e-bb67-9c8bdf996cd3"
-                ? "bg-danger-500 text-danger-700"
-                : "bg-info-800 text-info-700"
-            } inline-block whitespace-nowrap rounded-[0.27rem]  px-[0.65em] pb-[0.25em] pt-[0.35em] text-center align-baseline text-[0.75em] font-bold leading-none `}
-          >
-            {item.location.name}
-          </span>
-        )}
       </div>
     </div>
 
