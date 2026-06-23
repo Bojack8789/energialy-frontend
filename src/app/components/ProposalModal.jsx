@@ -18,6 +18,7 @@ import "react-toastify/dist/ReactToastify.css";
 import getLocalStorage from "../Func/localStorage";
 //import UploadthingButton from "./UploadthingButton";
 import { urlProduction } from "../data/dataGeneric";
+import { getAccessToken, getUserId } from "../Func/sessionStorage";
 import LimitExceededModal from "./LimitExceededModal";
 
 
@@ -68,6 +69,36 @@ export function ProposalModal({open, handleOpen, data}) {
     
     const userData = getLocalStorage();
     const accessToken = typeof window !== 'undefined' ? sessionStorage.getItem('accessToken') : null;
+
+    // Control de acceso: colaboradores necesitan permiso LICITACIONES para enviar propuestas
+    const [hasPermission, setHasPermission] = useState(true);
+
+    useEffect(() => {
+      const checkLicitacionesPermission = async () => {
+        if (!userData) return;
+        if (userData.role !== "company_collaborator") return;
+        try {
+          const token = getAccessToken();
+          const userId = getUserId();
+          if (!token || !userId) { setHasPermission(false); return; }
+          const response = await fetch(
+            `${process.env.NEXT_PUBLIC_BASE_URL}/users/${userId}/permissions`,
+            { headers: { Authorization: `Bearer ${token}`, "Content-Type": "application/json" } }
+          );
+          if (response.ok) {
+            const data = await response.json();
+            setHasPermission(Array.isArray(data.permissions) && data.permissions.includes("LICITACIONES"));
+          } else {
+            setHasPermission(false);
+          }
+        } catch (error) {
+          console.error("Error verificando permisos de propuestas:", error);
+          setHasPermission(false);
+        }
+      };
+      checkLicitacionesPermission();
+    }, []);
+
     const [serviceFeePercentage, setServiceFeePercentage] = useState(1);
     const [serviceAmount, setServiceAmount] = useState(0);
     const [receiverAmount, setReceiverAmount] = useState(0);
@@ -335,6 +366,23 @@ export function ProposalModal({open, handleOpen, data}) {
         }`}
       >
         <div className="mx-auto w-full max-w-[75%]  p-4 bg-slate-50 rounded-md">
+          {/* Acceso restringido para colaboradores sin permiso LICITACIONES */}
+          {!hasPermission ? (
+            <div className="flex flex-col items-center justify-center py-10 text-center">
+              <svg xmlns="http://www.w3.org/2000/svg" className="h-14 w-14 text-red-500 mb-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 15v2m-6 4h12a2 2 0 002-2v-6a2 2 0 00-2-2H6a2 2 0 00-2 2v6a2 2 0 002 2zm10-10V7a4 4 0 00-8 0v4h8z" />
+              </svg>
+              <h3 className="text-xl font-bold text-gray-800 mb-2">Acceso Restringido</h3>
+              <p className="text-gray-600 mb-1">No tienes permiso para enviar propuestas.</p>
+              <p className="text-gray-500 text-sm mb-6">Contacta a tu empleador para solicitar el permiso de <strong>Licitaciones</strong>.</p>
+              <button
+                className="bg-secondary-500 px-4 py-2 rounded-md text-white font-bold"
+                onClick={handleOpen}
+              >
+                Cerrar
+              </button>
+            </div>
+          ) : (
           <div className="flex flex-col gap-2 md:flex-row ">
             <div className="md:min-w-[75%]">
               <h4 className="mb-4 text-xl">{data.company?.name}</h4>
@@ -447,6 +495,7 @@ export function ProposalModal({open, handleOpen, data}) {
               </button>
             </div>
           </div>
+          )} {/* fin ternario hasPermission */}
         </div>
         <ToastContainer style={{ marginTop: "100px" }} />
       </div>

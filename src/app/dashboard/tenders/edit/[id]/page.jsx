@@ -23,6 +23,7 @@ import ErrorMensage from "@/app/components/ErrorMensage";
 import { ToastContainer } from "react-toastify";
 import { useRouter } from "next/navigation";
 import getLocalStorage from "@/app/Func/localStorage";
+import { getAccessToken, getUserId } from "@/app/Func/sessionStorage";
 import LimitExceededModal from "@/app/components/LimitExceededModal";
 import ToggleSwitch from "@/app/components/ToggleSwitch";
 import { useGetCompanyMetricsQuery } from "@/app/redux/services/metricsApi";
@@ -116,6 +117,35 @@ export default function EditTenderForm({ params }) {
   const [selectedLocationOption, setSelectedLocationOption] = useState(null);
 
   const [dataLoaded, setDataLoaded] = useState(false);
+
+  // Control de acceso: colaboradores necesitan permiso LICITACIONES
+  const [hasPermission, setHasPermission] = useState(true);
+
+  useEffect(() => {
+    const checkLicitacionesPermission = async () => {
+      if (!userData) return;
+      if (userData.role !== "company_collaborator") return;
+      try {
+        const token = getAccessToken();
+        const userId = getUserId();
+        if (!token || !userId) { setHasPermission(false); return; }
+        const response = await fetch(
+          `${process.env.NEXT_PUBLIC_BASE_URL}/users/${userId}/permissions`,
+          { headers: { Authorization: `Bearer ${token}`, "Content-Type": "application/json" } }
+        );
+        if (response.ok) {
+          const data = await response.json();
+          setHasPermission(Array.isArray(data.permissions) && data.permissions.includes("LICITACIONES"));
+        } else {
+          setHasPermission(false);
+        }
+      } catch (error) {
+        console.error("Error verificando permisos de licitaciones:", error);
+        setHasPermission(false);
+      }
+    };
+    checkLicitacionesPermission();
+  }, []);
 
   // Precargar datos de la licitación
   useEffect(() => {
@@ -539,6 +569,24 @@ export default function EditTenderForm({ params }) {
       <div className="flex items-center justify-center min-h-screen">
         <div className="text-center">
           <h2 className="text-2xl font-semibold mb-4">Cargando...</h2>
+        </div>
+      </div>
+    );
+  }
+
+  // Card de acceso restringido para colaboradores sin permiso LICITACIONES
+  if (!hasPermission) {
+    return (
+      <div className="flex items-center justify-center min-h-[60vh]">
+        <div className="bg-white rounded-2xl shadow-lg p-10 max-w-md w-full text-center">
+          <div className="flex justify-center mb-4">
+            <svg xmlns="http://www.w3.org/2000/svg" className="h-16 w-16 text-red-500" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 15v2m-6 4h12a2 2 0 002-2v-6a2 2 0 00-2-2H6a2 2 0 00-2 2v6a2 2 0 002 2zm10-10V7a4 4 0 00-8 0v4h8z" />
+            </svg>
+          </div>
+          <h3 className="text-xl font-bold text-gray-800 mb-2">Acceso Restringido</h3>
+          <p className="text-gray-600 mb-1">No tienes permiso para editar licitaciones.</p>
+          <p className="text-gray-500 text-sm">Contacta a tu empleador para solicitar el permiso de <strong>Licitaciones</strong>.</p>
         </div>
       </div>
     );
