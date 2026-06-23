@@ -18,8 +18,8 @@ const montserrat = Montserrat({ subsets: ["latin"] });
 const PERMISSION_OPTIONS = [
   { key: 'INSTITUCIONAL', title: 'INSTITUCIONAL', description: 'Editar datos de empresa.' },
   { key: 'COMUNICACIONES', title: 'COMUNICACIONES', description: 'Chatear con otros usuarios. Leer/Enviar documentación vía chat.' },
-  { key: 'LICITACIONES', title: 'LICITACIONES', description: '- Crear/Editar Licitaciones Propias. Invitar a proveedores. Seleccionar propuestas.\n- Enviar Propuestas en Licitaciones Externas. Leer/Enviar documentación.' },
-  { key: 'FINANZAS', title: 'FINANZAS', description: 'Solicitar productos financieros.' }
+  { key: 'LICITACIONES_PROPIAS', title: 'LICITACIONES PROPIAS', description: 'Crear/Editar licitaciones de la empresa. Invitar a proveedores. Seleccionar propuestas.' },
+  { key: 'PROPUESTAS', title: 'PROPUESTAS', description: 'Enviar propuestas en licitaciones externas.' },
 ];
 
 export default function Colaboradores() {
@@ -28,7 +28,7 @@ export default function Colaboradores() {
   const [isLoading, setIsLoading] = useState(false);
   const [showAddModal, setShowAddModal] = useState(false);
   const [editingCollaborator, setEditingCollaborator] = useState(null);
-  const [editPermissions, setEditPermissions] = useState({ INSTITUCIONAL: false, COMUNICACIONES: false, LICITACIONES: false, FINANZAS: false });
+  const [editPermissions, setEditPermissions] = useState({ INSTITUCIONAL: false, COMUNICACIONES: false, LICITACIONES_PROPIAS: false, PROPUESTAS: false });
   const [passwordModal, setPasswordModal] = useState(null);
   const [newPassword, setNewPassword] = useState('');
   const [newCollaborator, setNewCollaborator] = useState({
@@ -37,8 +37,8 @@ export default function Colaboradores() {
     permissions: {
       INSTITUCIONAL: false,
       COMUNICACIONES: false,
-      LICITACIONES: false,
-      FINANZAS: false
+      LICITACIONES_PROPIAS: false,
+      PROPUESTAS: false
     }
   });
 
@@ -138,8 +138,8 @@ export default function Colaboradores() {
         permissions: {
           INSTITUCIONAL: false,
           COMUNICACIONES: false,
-          LICITACIONES: false,
-          FINANZAS: false
+          LICITACIONES_PROPIAS: false,
+          PROPUESTAS: false
         }
       });
       setShowAddModal(false);
@@ -167,7 +167,7 @@ export default function Colaboradores() {
   };
 
   const handleOpenEdit = (collaborator) => {
-    const perms = { INSTITUCIONAL: false, COMUNICACIONES: false, LICITACIONES: false, FINANZAS: false };
+    const perms = { INSTITUCIONAL: false, COMUNICACIONES: false, LICITACIONES_PROPIAS: false, PROPUESTAS: false };
     (collaborator.permissions || []).forEach(p => { if (p in perms) perms[p] = true; });
     setEditPermissions(perms);
     setEditingCollaborator(collaborator);

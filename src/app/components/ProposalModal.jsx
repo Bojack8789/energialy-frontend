@@ -87,7 +87,7 @@ export function ProposalModal({open, handleOpen, data}) {
           );
           if (response.ok) {
             const data = await response.json();
-            setHasPermission(Array.isArray(data.permissions) && data.permissions.includes("LICITACIONES"));
+            setHasPermission(Array.isArray(data.permissions) && data.permissions.includes("PROPUESTAS"));
           } else {
             setHasPermission(false);
           }

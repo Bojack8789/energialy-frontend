@@ -69,7 +69,7 @@ function CreateTenderForm() {
         );
         if (response.ok) {
           const data = await response.json();
-          setHasPermission(Array.isArray(data.permissions) && data.permissions.includes("LICITACIONES"));
+          setHasPermission(Array.isArray(data.permissions) && data.permissions.includes("LICITACIONES_PROPIAS"));
         } else {
           setHasPermission(false);
         }
