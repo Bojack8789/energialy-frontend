@@ -367,7 +367,7 @@ export function ProposalModal({open, handleOpen, data}) {
       >
         <div className="mx-auto w-full max-w-[75%]  p-4 bg-slate-50 rounded-md">
           {/* Acceso restringido para colaboradores sin permiso LICITACIONES */}
-          {!hasPermission ? (
+          {!hasPermission && (
             <div className="flex flex-col items-center justify-center py-10 text-center">
               <svg xmlns="http://www.w3.org/2000/svg" className="h-14 w-14 text-red-500 mb-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
                 <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 15v2m-6 4h12a2 2 0 002-2v-6a2 2 0 00-2-2H6a2 2 0 00-2 2v6a2 2 0 002 2zm10-10V7a4 4 0 00-8 0v4h8z" />
@@ -382,7 +382,9 @@ export function ProposalModal({open, handleOpen, data}) {
                 Cerrar
               </button>
             </div>
-          ) : (
+          )}
+          {hasPermission && (
+          <>
           <div className="flex flex-col gap-2 md:flex-row ">
             <div className="md:min-w-[75%]">
               <h4 className="mb-4 text-xl">{data.company?.name}</h4>
@@ -495,7 +497,8 @@ export function ProposalModal({open, handleOpen, data}) {
               </button>
             </div>
           </div>
-          )} {/* fin ternario hasPermission */}
+          </>
+          )} {/* fin bloque hasPermission */}
         </div>
         <ToastContainer style={{ marginTop: "100px" }} />
       </div>
