@@ -24,7 +24,6 @@ export default function SideBar() {
   const [isDesktop, setIsDesktop]   = useState(false);
   const [userMenuOpen, setUserMenuOpen] = useState(false);
   const [dropdownPos, setDropdownPos] = useState({ top: 68, right: 20 });
-  const userMenuRef = useRef(null);
   const avatarBtnRef = useRef(null);
 
   const banner = user?.company?.bannerPicture || null;
@@ -53,10 +52,7 @@ export default function SideBar() {
 
   useEffect(() => {
     const handler = (e) => {
-      if (
-        userMenuRef.current && !userMenuRef.current.contains(e.target) &&
-        avatarBtnRef.current && !avatarBtnRef.current.contains(e.target)
-      ) {
+      if (avatarBtnRef.current && !avatarBtnRef.current.contains(e.target)) {
         setUserMenuOpen(false);
       }
     };
@@ -221,15 +217,14 @@ export default function SideBar() {
 
           {/* Avatar + dropdown */}
           {user && (
-            <div style={{ position: 'relative', flexShrink: 0 }}>
+            <div ref={avatarBtnRef} style={{ position: 'relative', flexShrink: 0 }}>
               <button
-                ref={avatarBtnRef}
                 onClick={() => {
-                  if (!userMenuOpen && avatarBtnRef.current) {
+                  if (avatarBtnRef.current) {
                     const rect = avatarBtnRef.current.getBoundingClientRect();
                     setDropdownPos({ top: rect.bottom + 8, right: window.innerWidth - rect.right });
                   }
-                  setUserMenuOpen(!userMenuOpen);
+                  setUserMenuOpen(prev => !prev);
                 }}
                 style={{ background: 'none', border: 'none', cursor: 'pointer', display: 'flex', alignItems: 'center', gap: 8, padding: 4, borderRadius: 8 }}
                 aria-label="Menú de usuario"
@@ -253,7 +248,7 @@ export default function SideBar() {
               </button>
 
               {userMenuOpen && createPortal(
-                <div ref={userMenuRef} style={{
+                <div style={{
                   position: 'fixed', top: dropdownPos.top, right: dropdownPos.right,
                   width: 220, background: '#fff', borderRadius: 12,
                   boxShadow: '0 8px 24px rgba(0,0,0,0.12)', border: '1px solid #e2e8f0',
