@@ -33,7 +33,9 @@ export default function Colaboradores() {
   const [newPassword, setNewPassword] = useState('');
   const [newCollaborator, setNewCollaborator] = useState({
     email: "",
-    name: "",
+    firstName: "",
+    lastName: "",
+    password: "",
     permissions: {
       INSTITUCIONAL: false,
       COMUNICACIONES: false,
@@ -81,15 +83,18 @@ export default function Colaboradores() {
   };
 
   const handleAddCollaborator = async () => {
-    if (!newCollaborator.email || !newCollaborator.name) {
+    if (!newCollaborator.email || !newCollaborator.firstName) {
       displayFailedMessage("Email y nombre son requeridos");
       return;
     }
+    if (!newCollaborator.password || newCollaborator.password.length < 6) {
+      displayFailedMessage("La contraseña debe tener al menos 6 caracteres");
+      return;
+    }
 
-    // Convert permissions object to array format expected by backend
     const selectedPermissions = Object.entries(newCollaborator.permissions)
       .filter(([_, value]) => value)
-      .map(([key, _]) => key);
+      .map(([key]) => key);
 
     if (selectedPermissions.length === 0) {
       displayFailedMessage("Debes seleccionar al menos un permiso");
@@ -99,57 +104,38 @@ export default function Colaboradores() {
     try {
       setIsLoading(true);
       const userData = getLocalStorage();
-      const userId = getUserId(userData);
       const companyId = getCompanyId(userData);
-
-      if (!userId || !companyId) {
-        displayFailedMessage("No se pudo obtener la información del usuario o empresa");
+      if (!companyId) {
+        displayFailedMessage("No se pudo obtener la información de la empresa");
         return;
       }
 
       const token = getAccessToken();
-
-      const response = await axios.post(
-        `${urlProduction}/collaborators/invite`,
+      await axios.post(
+        `${urlProduction}/collaborators/create`,
         {
           email: newCollaborator.email,
-          firstName: newCollaborator.name.split(' ')[0],
-          lastName: newCollaborator.name.split(' ').slice(1).join(' ') || '',
+          password: newCollaborator.password,
+          firstName: newCollaborator.firstName,
+          lastName: newCollaborator.lastName,
           permissions: selectedPermissions,
-          position: 'Colaborador',
-          inviterUserId: userId,
-          companyId: companyId
+          companyId,
         },
-        {
-          headers: {
-            'Authorization': token ? `Bearer ${token}` : '',
-            'Content-Type': 'application/json'
-          }
-        }      );
+        { headers: { 'Authorization': token ? `Bearer ${token}` : '', 'Content-Type': 'application/json' } }
+      );
 
-      // Refresh collaborators list
-      if (companyId) {
-        await fetchCollaborators(companyId);
-      }
-      
+      await fetchCollaborators(companyId);
       setNewCollaborator({
-        email: "",
-        name: "",
-        permissions: {
-          INSTITUCIONAL: false,
-          COMUNICACIONES: false,
-          LICITACIONES_PROPIAS: false,
-          PROPUESTAS: false
-        }
+        email: "", firstName: "", lastName: "", password: "",
+        permissions: { INSTITUCIONAL: false, COMUNICACIONES: false, LICITACIONES_PROPIAS: false, PROPUESTAS: false }
       });
       setShowAddModal(false);
-      displaySuccessMessage("Invitación enviada exitosamente");
+      displaySuccessMessage("Colaborador creado exitosamente");
     } catch (error) {
-      
       if (error.response?.status === 401) {
-        displayFailedMessage("No tienes permisos para invitar colaboradores.");
+        displayFailedMessage("No tienes permisos para crear colaboradores.");
       } else {
-        displayFailedMessage(error.response?.data?.error || "Error al enviar invitación");
+        displayFailedMessage(error.response?.data?.error || "Error al crear colaborador");
       }
     } finally {
       setIsLoading(false);
@@ -408,7 +394,7 @@ export default function Colaboradores() {
           <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50 p-4">
             <div className="bg-white rounded-lg p-4 sm:p-6 w-full max-w-2xl mx-4 max-h-[90vh] overflow-y-auto">
               <div className="flex justify-between items-center mb-4">
-                <h3 className="text-lg font-semibold">Agregar Nuevo Colaborador</h3>
+                <h3 className="text-lg font-semibold">Agregar Colaborador</h3>
                 <button
                   onClick={() => setShowAddModal(false)}
                   className="text-gray-500 hover:text-gray-700 p-2 rounded-lg hover:bg-gray-100 transition-colors min-w-[36px] min-h-[36px] flex items-center justify-center"
@@ -421,27 +407,43 @@ export default function Colaboradores() {
                 {/* Basic Info */}
                 <div className="grid grid-cols-1 lg:grid-cols-2 gap-4">
                   <div>
-                    <label className="block text-sm font-medium text-gray-700 mb-2">
-                      Nombre Completo
-                    </label>
+                    <label className="block text-sm font-medium text-gray-700 mb-2">Nombre</label>
                     <input
                       type="text"
-                      value={newCollaborator.name}
-                      onChange={(e) => setNewCollaborator(prev => ({...prev, name: e.target.value}))}
+                      value={newCollaborator.firstName}
+                      onChange={(e) => setNewCollaborator(prev => ({...prev, firstName: e.target.value}))}
                       className="w-full border border-gray-300 rounded-lg px-3 py-2 focus:outline-none focus:ring-2 focus:ring-indigo-500 text-sm"
-                      placeholder="Nombre del colaborador"
+                      placeholder="Nombre"
                     />
                   </div>
                   <div>
-                    <label className="block text-sm font-medium text-gray-700 mb-2">
-                      Email
-                    </label>
+                    <label className="block text-sm font-medium text-gray-700 mb-2">Apellido</label>
+                    <input
+                      type="text"
+                      value={newCollaborator.lastName}
+                      onChange={(e) => setNewCollaborator(prev => ({...prev, lastName: e.target.value}))}
+                      className="w-full border border-gray-300 rounded-lg px-3 py-2 focus:outline-none focus:ring-2 focus:ring-indigo-500 text-sm"
+                      placeholder="Apellido"
+                    />
+                  </div>
+                  <div>
+                    <label className="block text-sm font-medium text-gray-700 mb-2">Email</label>
                     <input
                       type="email"
                       value={newCollaborator.email}
                       onChange={(e) => setNewCollaborator(prev => ({...prev, email: e.target.value}))}
                       className="w-full border border-gray-300 rounded-lg px-3 py-2 focus:outline-none focus:ring-2 focus:ring-indigo-500 text-sm"
                       placeholder="email@ejemplo.com"
+                    />
+                  </div>
+                  <div>
+                    <label className="block text-sm font-medium text-gray-700 mb-2">Contraseña</label>
+                    <input
+                      type="password"
+                      value={newCollaborator.password}
+                      onChange={(e) => setNewCollaborator(prev => ({...prev, password: e.target.value}))}
+                      className="w-full border border-gray-300 rounded-lg px-3 py-2 focus:outline-none focus:ring-2 focus:ring-indigo-500 text-sm"
+                      placeholder="Mínimo 6 caracteres"
                     />
                   </div>
                 </div>
