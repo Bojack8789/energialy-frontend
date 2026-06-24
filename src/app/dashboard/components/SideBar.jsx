@@ -22,7 +22,9 @@ export default function SideBar() {
   const [drawerOpen, setDrawerOpen] = useState(false);
   const [isDesktop, setIsDesktop]   = useState(false);
   const [userMenuOpen, setUserMenuOpen] = useState(false);
+  const [dropdownPos, setDropdownPos] = useState({ top: 68, right: 20 });
   const userMenuRef = useRef(null);
+  const avatarBtnRef = useRef(null);
 
   const banner = user?.company?.bannerPicture || null;
   const logo   = user?.company?.profilePicture || null;
@@ -50,7 +52,10 @@ export default function SideBar() {
 
   useEffect(() => {
     const handler = (e) => {
-      if (userMenuRef.current && !userMenuRef.current.contains(e.target)) {
+      if (
+        userMenuRef.current && !userMenuRef.current.contains(e.target) &&
+        avatarBtnRef.current && !avatarBtnRef.current.contains(e.target)
+      ) {
         setUserMenuOpen(false);
       }
     };
@@ -215,9 +220,16 @@ export default function SideBar() {
 
           {/* Avatar + dropdown */}
           {user && (
-            <div style={{ position: 'relative', flexShrink: 0 }} ref={userMenuRef}>
+            <div style={{ position: 'relative', flexShrink: 0 }}>
               <button
-                onClick={() => setUserMenuOpen(!userMenuOpen)}
+                ref={avatarBtnRef}
+                onClick={() => {
+                  if (!userMenuOpen && avatarBtnRef.current) {
+                    const rect = avatarBtnRef.current.getBoundingClientRect();
+                    setDropdownPos({ top: rect.bottom + 8, right: window.innerWidth - rect.right });
+                  }
+                  setUserMenuOpen(!userMenuOpen);
+                }}
                 style={{ background: 'none', border: 'none', cursor: 'pointer', display: 'flex', alignItems: 'center', gap: 8, padding: 4, borderRadius: 8 }}
                 aria-label="Menú de usuario"
               >
@@ -240,11 +252,11 @@ export default function SideBar() {
               </button>
 
               {userMenuOpen && (
-                <div style={{
-                  position: 'absolute', right: 0, top: 'calc(100% + 8px)',
+                <div ref={userMenuRef} style={{
+                  position: 'fixed', top: dropdownPos.top, right: dropdownPos.right,
                   width: 220, background: '#fff', borderRadius: 12,
                   boxShadow: '0 8px 24px rgba(0,0,0,0.12)', border: '1px solid #e2e8f0',
-                  zIndex: 200, overflow: 'hidden',
+                  zIndex: 9999, overflow: 'hidden',
                 }}>
                   <div style={{ padding: '12px 16px', borderBottom: '1px solid #f1f5f9' }}>
                     <p style={{ margin: 0, fontSize: 13, fontWeight: 600, color: '#1e293b' }}>{user.company?.name || 'Sin empresa'}</p>
