@@ -5,6 +5,7 @@ import Link from 'next/link';
 import Logo from '@/app/assets/Energialy Logo-01.svg';
 import { Dialog, DialogPanel, Transition, TransitionChild } from '@headlessui/react';
 import { Fragment, useState, useEffect, useRef } from 'react';
+import { createPortal } from 'react-dom';
 import { AiOutlineMenu, AiOutlineClose } from 'react-icons/ai';
 import { MdSpaceDashboard, MdOutlineLogout, MdPerson } from 'react-icons/md';
 import MenuItem from './MenuItem';
@@ -251,7 +252,7 @@ export default function SideBar() {
                 </svg>
               </button>
 
-              {userMenuOpen && (
+              {userMenuOpen && createPortal(
                 <div ref={userMenuRef} style={{
                   position: 'fixed', top: dropdownPos.top, right: dropdownPos.right,
                   width: 220, background: '#fff', borderRadius: 12,
@@ -288,7 +289,8 @@ export default function SideBar() {
                   >
                     <MdOutlineLogout size={16} /> Cerrar sesión
                   </button>
-                </div>
+                </div>,
+                document.body
               )}
             </div>
           )}
