@@ -168,7 +168,6 @@ export default function SideBar() {
         borderBottom: '1px solid #e2e8f0',
         zIndex: 100,
         maxWidth: '100vw',
-        overflow: 'hidden',
         boxSizing: 'border-box',
       }}>
         {/* Logo ENERGIALY */}
