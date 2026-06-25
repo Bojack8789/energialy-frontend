@@ -63,7 +63,10 @@ const CardTender = ({item, isOwn}) => {
         {item.company?.id && !isOwn && (
           <button
             type="button"
-            className="rounded bg-gray-700 px-3 py-1.5 text-xs font-medium text-white hover:bg-gray-800 transition-colors shadow-sm"
+            className="rounded px-3 py-1.5 text-xs font-medium transition-colors shadow-sm"
+            style={{ backgroundColor: '#374151', color: '#ffffff' }}
+            onMouseEnter={e => e.currentTarget.style.backgroundColor = '#1f2937'}
+            onMouseLeave={e => e.currentTarget.style.backgroundColor = '#374151'}
             onClick={() => setShowProfile(true)}
           >
             Ver Perfil
