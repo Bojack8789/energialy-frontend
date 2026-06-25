@@ -79,10 +79,7 @@ const CardProposal = ({ item }) => {
             </button>
             <button
               type="button"
-              className="inline-block rounded px-4 pb-2 pt-2.5 text-xs font-medium uppercase leading-normal transition duration-150 ease-in-out"
-              style={{ backgroundColor: '#374151', color: '#ffffff' }}
-              onMouseEnter={e => e.currentTarget.style.backgroundColor = '#1f2937'}
-              onMouseLeave={e => e.currentTarget.style.backgroundColor = '#374151'}
+              className="inline-block rounded bg-primary-500 px-4 pb-2 pt-2.5 text-xs font-medium uppercase leading-normal text-white shadow-[0_4px_9px_-4px_rgba(25,22,84,0.4)] transition duration-150 ease-in-out hover:bg-primary-400"
               onClick={() => setShowProfile(true)}
             >
               Ver Perfil
