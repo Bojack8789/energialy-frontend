@@ -63,7 +63,7 @@ const CardTender = ({item, isOwn}) => {
         {item.company?.id && !isOwn && (
           <button
             type="button"
-            className="rounded bg-gray-100 border border-gray-300 px-3 py-1.5 text-xs font-medium text-gray-700 hover:bg-gray-200 transition-colors"
+            className="rounded bg-gray-700 px-3 py-1.5 text-xs font-medium text-white hover:bg-gray-800 transition-colors shadow-sm"
             onClick={() => setShowProfile(true)}
           >
             Ver Perfil
