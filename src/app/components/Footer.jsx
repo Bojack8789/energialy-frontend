@@ -15,8 +15,8 @@ export default function Footer() {
   return (
     <footer className="relative bg-[#545353] bg-cover bg-center h-full">
       <div className="h-full flex items-center justify-center p-2 px-4 mb-4 mt-12 border-b border-[#3D3D3D]">
-        <div className="flex flex-wrap w-full max-w-7xl mx-auto">
-          <div className="w-full sm:w-6/12 md:w-6/12 lg:w-6/12 xl:w-3/12 px-4 text-[#B4B4B4]">
+        <div className="grid grid-cols-2 md:grid-cols-4 gap-y-8 w-full max-w-7xl mx-auto">
+          <div className="col-span-2 md:col-span-1 px-4 text-[#B4B4B4]">
             <a href="/">
               <Image
                 src={Logo}
@@ -32,7 +32,7 @@ export default function Footer() {
               </p>
             </div>
           </div>
-          <div className="w-full sm:w-6/12 md:w-3/12 lg:w-3/12 xl:w-3/12 px-4 text-[#B4B4B4]">
+          <div className="col-span-1 px-4 text-[#B4B4B4]">
             <h4 className="text-xl tracking-wider mb-4">OPORTUNIDADES</h4>
             <ul className="pl-0">
               {oportunities.map((option, index) => (
@@ -47,7 +47,7 @@ export default function Footer() {
               ))}
             </ul>
           </div>
-          <div className="w-full sm:w-6/12 md:w-3/12 lg:w-3/12 xl:w-3/12 px-4 text-[#B4B4B4]">
+          <div className="col-span-1 px-4 text-[#B4B4B4]">
             <h4 className="text-xl tracking-wider mb-4">COMPAÑIA</h4>
             <ul className="pl-0">
               <li>
@@ -60,7 +60,7 @@ export default function Footer() {
               </li>
             </ul>
           </div>
-          <div className="w-full sm:w-6/12 md:w-3/12 lg:w-3/12 xl:w-3/12 px-4 text-[#B4B4B4]">
+          <div className="col-span-1 px-4 text-[#B4B4B4]">
             <h4 className="text-xl tracking-wider mb-4">Seguinos</h4>
             <ul className="flex list-none p-0">
               <li className="p-2 mx-2">

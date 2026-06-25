@@ -105,7 +105,6 @@ const SubscriptionWidgets = ({ companyId }) => {
     border: '0.5px solid var(--color-border-tertiary)',
     borderRadius: 'var(--border-radius-lg)',
     padding: '14px 16px',
-    flex: '1 1 180px',
     minWidth: 0,
   };
 
@@ -136,7 +135,7 @@ const SubscriptionWidgets = ({ companyId }) => {
 
   if (loading) {
     return (
-      <div style={{ display: 'flex', gap: 12, marginBottom: 16 }}>
+      <div style={{ display: 'grid', gridTemplateColumns: 'repeat(3, 1fr)', gap: 12, marginBottom: 16 }}>
         {[1,2,3].map(i => (
           <div key={i} style={{ ...cardStyle, height: 100, background: 'var(--color-background-secondary)', opacity: 0.5 }} />
         ))}
@@ -149,7 +148,7 @@ const SubscriptionWidgets = ({ companyId }) => {
   const daysLeft = metrics?.plan?.daysRemaining;
 
   return (
-    <div style={{ display: 'flex', gap: 12, marginBottom: 16, flexWrap: 'wrap' }}>
+    <div style={{ display: 'grid', gridTemplateColumns: 'repeat(3, 1fr)', gap: 12, marginBottom: 16 }}>
 
       {/* Tarjeta 1: Plan actual */}
       <div style={cardStyle}>

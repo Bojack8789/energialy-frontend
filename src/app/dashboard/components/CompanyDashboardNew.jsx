@@ -203,15 +203,17 @@ function CompanyDashboardNew({ user }) {
   return (
     <div className="w-full px-4 py-6 sm:px-6 lg:px-8 max-w-screen-2xl mx-auto">
       {/* Header */}
-      <div className="mb-6 flex flex-col gap-4 sm:flex-row sm:items-start sm:justify-between bg-white dark:bg-boxdark rounded-lg p-4 sm:p-6 shadow-sm">
-        <h2 className="text-title-md2 font-semibold text-black dark:text-white">
-          Hola, {user.firstName}
-        </h2>
-        <div className="flex flex-col sm:flex-row items-stretch sm:items-center gap-3 w-full sm:w-auto">
+      <div className="mb-6 flex flex-col gap-4 bg-white dark:bg-boxdark rounded-lg p-4 sm:p-6 shadow-sm">
+        <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-3">
+          <h2 className="text-title-md2 font-semibold text-black dark:text-white">
+            Hola, {user.firstName}
+          </h2>
           <PeriodSelector
             selectedPeriod={selectedPeriod}
             onPeriodChange={setSelectedPeriod}
           />
+        </div>
+        <div className="flex flex-wrap gap-2">
           <Buttons />
         </div>
       </div>

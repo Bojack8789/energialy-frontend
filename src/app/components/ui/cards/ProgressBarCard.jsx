@@ -97,23 +97,23 @@ const ProgressBarCard = ({
   }
 
   return (
-    <div className="rounded-sm border border-stroke bg-white p-6 shadow-default dark:border-strokedark dark:bg-boxdark">
+    <div className="rounded-sm border border-stroke bg-white p-3 sm:p-4 lg:p-6 shadow-default dark:border-strokedark dark:bg-boxdark">
       {/* Header con título y badge */}
-      <div className="flex items-start justify-between mb-4">
-        <div className="flex items-center gap-3">
+      <div className="flex items-start justify-between mb-3">
+        <div className="flex items-center gap-2">
           {icon && (
-            <div className={`flex h-11 w-11 items-center justify-center rounded-full ${autoColors.light}`}>
-              <div className={autoColors.text}>
+            <div className={`flex h-8 w-8 lg:h-11 lg:w-11 flex-shrink-0 items-center justify-center rounded-full ${autoColors.light}`}>
+              <div className={`${autoColors.text} scale-75 lg:scale-100`}>
                 {icon}
               </div>
             </div>
           )}
-          <div>
-            <h4 className="text-lg font-semibold text-black dark:text-white">
+          <div className="min-w-0">
+            <h4 className="text-sm lg:text-lg font-semibold text-black dark:text-white leading-tight">
               {title}
             </h4>
             {subtitle && (
-              <p className="text-sm text-body dark:text-bodydark">
+              <p className="text-xs lg:text-sm text-body dark:text-bodydark truncate">
                 {subtitle}
               </p>
             )}
@@ -121,7 +121,7 @@ const ProgressBarCard = ({
         </div>
 
         {badgeText && (
-          <span className={`inline-flex rounded-full px-3 py-1 text-sm font-medium ${badgeColors[badgeVariant]}`}>
+          <span className={`inline-flex rounded-full px-2 py-0.5 lg:px-3 lg:py-1 text-xs font-medium flex-shrink-0 ml-1 ${badgeColors[badgeVariant]}`}>
             {badgeText}
           </span>
         )}
@@ -130,20 +130,20 @@ const ProgressBarCard = ({
       {/* Valores y barra de progreso */}
       <div className="space-y-2">
         {/* Números */}
-        <div className="flex items-baseline justify-between">
-          <div className="flex items-baseline gap-2">
-            <span className={`text-2xl font-bold ${autoColors.text}`}>
+        <div className="flex items-baseline justify-between gap-1 flex-wrap">
+          <div className="flex items-baseline gap-1">
+            <span className={`text-xl lg:text-2xl font-bold ${autoColors.text}`}>
               {current}
             </span>
             {!isUnlimited && (
-              <span className="text-body dark:text-bodydark">
+              <span className="text-xs text-body dark:text-bodydark">
                 / {max}
               </span>
             )}
           </div>
 
           {label && (
-            <span className="text-sm font-medium text-body dark:text-bodydark">
+            <span className="text-xs font-medium text-body dark:text-bodydark leading-tight">
               {label}
             </span>
           )}

@@ -151,7 +151,7 @@ const SubscriptionWidgets = ({ companyId, selectedPeriod = 30 }) => {
         Tu Suscripción
       </h3>
 
-      <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4">
+      <div className="grid grid-cols-1 sm:grid-cols-3 gap-4">
         {/* Widget del Plan */}
         <ProgressBarCard
           title="Plan Actual"
@@ -215,7 +215,7 @@ const SubscriptionWidgets = ({ companyId, selectedPeriod = 30 }) => {
                 {planData ? `Plan actual: ${planData.name}` : 'Selecciona un plan para tu empresa'}
               </p>
 
-              <div className="grid md:grid-cols-3 gap-6">
+              <div className="grid grid-cols-1 sm:grid-cols-3 gap-6">
                 {/* Plan GRATIS */}
                 <div className="border-2 border-gray-200 rounded-lg p-6 hover:border-gray-400 transition-colors">
                   <div className="text-center">
