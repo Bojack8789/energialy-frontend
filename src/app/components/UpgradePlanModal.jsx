@@ -50,7 +50,7 @@ const UpgradePlanModal = ({ isOpen, onClose, currentPlanCode }) => {
           border: 'border-gray-300',
           text: 'text-gray-700',
           badge: 'bg-gray-100 text-gray-700',
-          button: 'bg-gray-600 hover:bg-gray-700',
+          button: 'bg-primary-500 hover:bg-primary-400',
           gradient: 'from-gray-100 to-gray-50'
         };
       case 'base':
@@ -77,7 +77,7 @@ const UpgradePlanModal = ({ isOpen, onClose, currentPlanCode }) => {
           border: 'border-gray-300',
           text: 'text-gray-700',
           badge: 'bg-gray-100 text-gray-700',
-          button: 'bg-gray-600 hover:bg-gray-700',
+          button: 'bg-primary-500 hover:bg-primary-400',
           gradient: 'from-gray-100 to-gray-50'
         };
     }

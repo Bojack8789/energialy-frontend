@@ -75,7 +75,7 @@ function Page({params}) {
               </div>
               <button
                 onClick={backPage}
-                className="mt-4 md:mt-0 bg-gray-600 hover:bg-gray-700 text-white font-semibold rounded-md px-6 py-2 transition-colors"
+                className="mt-4 md:mt-0 bg-primary-500 hover:bg-primary-400 text-white font-semibold rounded-md px-6 py-2 transition-colors"
               >
                 Volver
               </button>

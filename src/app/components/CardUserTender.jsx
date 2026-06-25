@@ -135,7 +135,7 @@ function CardUserTender({item}) {
 
           <button
             type="button"
-            className="flex-1 rounded-lg bg-gray-600 px-6 py-3 text-sm font-medium leading-normal text-white shadow-sm hover:bg-gray-700 active:bg-gray-800 transition-all duration-200 focus:outline-none focus:ring-2 focus:ring-gray-600 focus:ring-offset-2"
+            className="flex-1 rounded-lg bg-secondary-600 px-6 py-3 text-sm font-medium leading-normal text-white shadow-sm hover:bg-secondary-700 active:bg-secondary-800 transition-all duration-200 focus:outline-none focus:ring-2 focus:ring-secondary-600 focus:ring-offset-2"
             onClick={() => setShowInvitations(!showInvitations)}
           >
             {showInvitations ? 'Ocultar Invitaciones' : 'Gestionar Invitaciones'}
