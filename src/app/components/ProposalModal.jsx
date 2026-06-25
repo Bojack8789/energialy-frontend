@@ -99,9 +99,18 @@ export function ProposalModal({open, handleOpen, data}) {
       checkLicitacionesPermission();
     }, []);
 
-    const [serviceFeePercentage, setServiceFeePercentage] = useState(1);
+    const [serviceFeePercentage, setServiceFeePercentage] = useState(2);
     const [serviceAmount, setServiceAmount] = useState(0);
     const [receiverAmount, setReceiverAmount] = useState(0);
+    const [showFeeTooltip, setShowFeeTooltip] = useState(false);
+
+    const getCommissionRate = (amount) => {
+      if (amount <= 50000) return 2;
+      if (amount <= 200000) return 1.75;
+      if (amount <= 500000) return 1.5;
+      if (amount <= 1000000) return 1.25;
+      return 1;
+    };
     const [limitExceededModal, setLimitExceededModal] = useState({
       isOpen: false,
       limitInfo: null,
@@ -293,7 +302,9 @@ export function ProposalModal({open, handleOpen, data}) {
       const { name, value } = e.target;
       if (name === "totalAmount") {
         const numericValue = parseFloat(value) || 0;
-        calculateFee(numericValue, serviceFeePercentage);
+        const rate = getCommissionRate(numericValue);
+        setServiceFeePercentage(rate);
+        calculateFee(numericValue, rate);
         setProposal({ ...proposal, [name]: numericValue });
         return;
       }
@@ -439,13 +450,51 @@ export function ProposalModal({open, handleOpen, data}) {
                 onChange={handleInput}
               />
               <div className="mt-2 flex justify-start gap-5 ml-2">
-                <div className="text-xs">
+                <div className="text-xs relative">
                   <span className="font-bold">(USD) {serviceAmount}</span>{" "}
                   {"  "}
                   <span className="font-bold text-secondary-600">
                     &quot;Energialy&quot;
                   </span>
-                  ServiceFee ( Fee: entre 2,5% y 0.5%)
+                  {" "}ServiceFee{" "}
+                  <span
+                    className="cursor-pointer text-secondary-600 underline"
+                    onMouseEnter={() => setShowFeeTooltip(true)}
+                    onMouseLeave={() => setShowFeeTooltip(false)}
+                  >
+                    (+ info &gt;)
+                  </span>
+                  {showFeeTooltip && (
+                    <div className="absolute left-0 top-5 z-50 bg-white border border-gray-300 rounded-md shadow-lg p-3 w-64">
+                      <p className="text-center font-bold text-secondary-600 mb-2 text-xs uppercase tracking-wide">
+                        Tabla de Comisiones
+                      </p>
+                      <table className="w-full text-xs">
+                        <tbody>
+                          <tr className="border-b border-gray-100">
+                            <td className="py-1 pr-2">U$D 0 a U$D 50,000</td>
+                            <td className="py-1 font-bold text-right">2%</td>
+                          </tr>
+                          <tr className="border-b border-gray-100">
+                            <td className="py-1 pr-2">U$D 50,001 a U$D 200,000</td>
+                            <td className="py-1 font-bold text-right">1,75%</td>
+                          </tr>
+                          <tr className="border-b border-gray-100">
+                            <td className="py-1 pr-2">U$D 200,001 a U$D 500,000</td>
+                            <td className="py-1 font-bold text-right">1,5%</td>
+                          </tr>
+                          <tr className="border-b border-gray-100">
+                            <td className="py-1 pr-2">U$D 500,001 a U$D 1,000,000</td>
+                            <td className="py-1 font-bold text-right">1,25%</td>
+                          </tr>
+                          <tr>
+                            <td className="py-1 pr-2">U$D 1,000,001 o mayor</td>
+                            <td className="py-1 font-bold text-right">1%</td>
+                          </tr>
+                        </tbody>
+                      </table>
+                    </div>
+                  )}
                 </div>
                 <div className="text-xs">
                   <span className="font-bold">(USD) {receiverAmount}</span>{" "}
