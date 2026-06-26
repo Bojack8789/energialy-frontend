@@ -451,8 +451,10 @@ function CreateTenderForm() {
             })
           );
         }
-        // Eliminar customFields del payload porque la tabla Tenders no lo soporta
-        delete payload.customFields;
+        // Limpiar customFields: remover id temporal antes de enviar
+        if (Array.isArray(payload.customFields)) {
+          payload.customFields = payload.customFields.map(({ id, ...rest }) => rest);
+        }
 
         // Obtener el token de autenticación
         const accessToken = typeof window !== 'undefined' ? sessionStorage.getItem('accessToken') : null;

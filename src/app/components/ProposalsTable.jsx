@@ -1,5 +1,5 @@
 "use client";
-import { useState } from "react";
+import React, { useState } from "react";
 import { useUpdateProposalStatusMutation } from "../redux/services/ProposalApi";
 
 const ProposalsTable = ({ proposals, tenderInfo, onRefresh }) => {
@@ -8,6 +8,7 @@ const ProposalsTable = ({ proposals, tenderInfo, onRefresh }) => {
   const [selectedProposal, setSelectedProposal] = useState(null);
   const [showConfirmModal, setShowConfirmModal] = useState(false);
   const [actionType, setActionType] = useState("");
+  const [expandedProposal, setExpandedProposal] = useState(null);
 
   // Filtrar propuestas por estado
   const filteredProposals = proposals?.filter((proposal) => {
@@ -191,19 +192,22 @@ const ProposalsTable = ({ proposals, tenderInfo, onRefresh }) => {
                 <th className="px-6 py-4 text-left text-xs font-semibold text-gray-600 uppercase tracking-wider">
                   Acciones
                 </th>
+                <th className="px-6 py-4 text-left text-xs font-semibold text-gray-600 uppercase tracking-wider">
+                  Detalle
+                </th>
               </tr>
             </thead>
             <tbody className="divide-y divide-gray-200">
               {sortedProposals.length === 0 ? (
                 <tr>
-                  <td colSpan="7" className="px-6 py-8 text-center text-gray-500">
+                  <td colSpan="8" className="px-6 py-8 text-center text-gray-500">
                     No hay propuestas para mostrar
                   </td>
                 </tr>
               ) : (
                 sortedProposals.map((proposal, index) => (
+                  <React.Fragment key={proposal.id}>
                   <tr
-                    key={proposal.id}
                     className={`hover:bg-gray-50 transition-colors ${
                       proposal.status === "selected" ? "bg-green-50" : ""
                     }`}
@@ -246,6 +250,14 @@ const ProposalsTable = ({ proposals, tenderInfo, onRefresh }) => {
                     </td>
                     <td className="px-6 py-4">
                       {getStatusBadge(proposal.status, proposal.isActive)}
+                    </td>
+                    <td className="px-6 py-4">
+                      <button
+                        onClick={() => setExpandedProposal(expandedProposal === proposal.id ? null : proposal.id)}
+                        className="px-3 py-1 bg-gray-100 hover:bg-gray-200 text-gray-700 text-xs rounded-md transition-colors"
+                      >
+                        {expandedProposal === proposal.id ? "▲ Ocultar" : "▼ Ver más"}
+                      </button>
                     </td>
                     <td className="px-6 py-4">
                       <div className="flex flex-col gap-2">
@@ -309,6 +321,59 @@ const ProposalsTable = ({ proposals, tenderInfo, onRefresh }) => {
                       </div>
                     </td>
                   </tr>
+                  {/* Panel expandible con descripción, campos personalizados y servicios */}
+                  {expandedProposal === proposal.id && (
+                    <tr className="bg-blue-50">
+                      <td colSpan="8" className="px-6 py-4">
+                        <div className="space-y-4">
+                          {/* Descripción */}
+                          <div>
+                            <p className="text-xs font-semibold text-gray-500 uppercase mb-1">Descripción del trabajo</p>
+                            <p className="text-sm text-gray-700 whitespace-pre-wrap">{proposal.description || "Sin descripción"}</p>
+                          </div>
+
+                          {/* Cotización de servicios */}
+                          {proposal.servicePriceQuotes?.length > 0 && (
+                            <div>
+                              <p className="text-xs font-semibold text-gray-500 uppercase mb-2">Cotización de servicios</p>
+                              <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-2">
+                                {proposal.servicePriceQuotes.map((sq, i) => (
+                                  <div key={i} className="bg-white border border-gray-200 rounded-md p-3">
+                                    <p className="text-sm font-medium text-gray-800">{sq.name}</p>
+                                    <p className="text-xs text-gray-500">Referencia: U$D {sq.referencePrice} {sq.priceType === 'per_day' ? '/ día' : '(fijo)'}</p>
+                                    <p className="text-sm font-bold text-blue-700 mt-1">
+                                      Cotizado: U$D {sq.quotedPrice} {sq.priceType === 'per_day' ? '/ día' : '(fijo)'}
+                                    </p>
+                                  </div>
+                                ))}
+                              </div>
+                            </div>
+                          )}
+
+                          {/* Respuestas a campos personalizados */}
+                          {proposal.customFieldAnswers?.length > 0 && (
+                            <div>
+                              <p className="text-xs font-semibold text-gray-500 uppercase mb-2">Información adicional</p>
+                              <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
+                                {proposal.customFieldAnswers.map((ans, i) => (
+                                  <div key={i} className="bg-white border border-gray-200 rounded-md p-3">
+                                    <p className="text-xs font-medium text-gray-500">{ans.label}</p>
+                                    <p className="text-sm text-gray-800 mt-1">{ans.value?.toString() || "Sin respuesta"}</p>
+                                  </div>
+                                ))}
+                              </div>
+                            </div>
+                          )}
+
+                          {/* Si no hay campos extra */}
+                          {!proposal.servicePriceQuotes?.length && !proposal.customFieldAnswers?.length && (
+                            <p className="text-sm text-gray-500 italic">No hay información adicional en esta propuesta.</p>
+                          )}
+                        </div>
+                      </td>
+                    </tr>
+                  )}
+                  </React.Fragment>
                 ))
               )}
             </tbody>

@@ -104,6 +104,10 @@ export function ProposalModal({open, handleOpen, data}) {
     const [receiverAmount, setReceiverAmount] = useState(0);
     const [showFeeTooltip, setShowFeeTooltip] = useState(false);
 
+    // Respuestas a campos personalizados y servicios de la licitación
+    const [customFieldAnswers, setCustomFieldAnswers] = useState({});
+    const [servicePriceQuotes, setServicePriceQuotes] = useState({});
+
     const getCommissionRate = (amount) => {
       if (amount <= 50000) return 2;
       if (amount <= 200000) return 1.75;
@@ -186,6 +190,8 @@ export function ProposalModal({open, handleOpen, data}) {
             tenderId: "",
             companyId: "",
           });
+          setCustomFieldAnswers({});
+          setServicePriceQuotes({});
 
           setTimeout(() => {
             handleOpen();
@@ -337,8 +343,38 @@ export function ProposalModal({open, handleOpen, data}) {
           return;
         }
 
-        console.log('Sending proposal:', proposal);
-        createProposal(proposal);
+        // Validar campos personalizados requeridos
+        const tenderCustomFields = data?.customFields || [];
+        for (const field of tenderCustomFields) {
+          if (field.required && !customFieldAnswers[field.label]?.toString().trim()) {
+            displayFailedMessage(`El campo "${field.label}" es requerido`);
+            return;
+          }
+        }
+
+        // Construir payload con campos adicionales
+        const customFieldAnswersArray = tenderCustomFields.map(field => ({
+          label: field.label,
+          type: field.type,
+          value: customFieldAnswers[field.label] ?? "",
+        }));
+
+        const tenderServicePrices = data?.servicePrices || [];
+        const servicePriceQuotesArray = tenderServicePrices.map(service => ({
+          name: service.name,
+          priceType: service.priceType,
+          referencePrice: service.price,
+          quotedPrice: parseFloat(servicePriceQuotes[service.name]) || 0,
+        }));
+
+        const fullProposal = {
+          ...proposal,
+          customFieldAnswers: customFieldAnswersArray,
+          servicePriceQuotes: servicePriceQuotesArray,
+        };
+
+        console.log('Sending proposal:', fullProposal);
+        createProposal(fullProposal);
     }
   
     const optionDuration = [
@@ -524,9 +560,122 @@ export function ProposalModal({open, handleOpen, data}) {
                 className="border-2 border-gray-300 rounded-md p-2"
                 onChange={handleInput}
               ></textarea>
-              {/* <UploadthingButton/> */}
             </div>
           </div>
+
+          {/* Servicios a cotizar */}
+          {data?.servicePrices?.length > 0 && (
+            <div className="mt-4 border-t border-gray-200 pt-4">
+              <h4 className="font-semibold text-gray-800 mb-3">Cotización de Servicios</h4>
+              <p className="text-xs text-gray-500 mb-3">El creador definió los siguientes servicios. Indicá tu precio para cada uno.</p>
+              <div className="flex flex-col gap-3">
+                {data.servicePrices.map((service, i) => (
+                  <div key={i} className="border border-gray-200 rounded-md p-3 bg-gray-50">
+                    <div className="flex justify-between items-start mb-2">
+                      <div>
+                        <p className="font-medium text-sm text-gray-800">{service.name}</p>
+                        {service.description && <p className="text-xs text-gray-500">{service.description}</p>}
+                        <p className="text-xs text-gray-400 mt-1">
+                          Precio de referencia: U$D {service.price} {service.priceType === 'per_day' ? '/ día' : '(fijo)'}
+                        </p>
+                      </div>
+                    </div>
+                    <div className="flex items-center gap-2">
+                      <span className="text-sm font-medium text-gray-600">U$D</span>
+                      <input
+                        type="number"
+                        min="0"
+                        step="0.01"
+                        placeholder={`Tu precio ${service.priceType === 'per_day' ? 'por día' : 'fijo'}`}
+                        value={servicePriceQuotes[service.name] ?? ""}
+                        onChange={(e) => setServicePriceQuotes(prev => ({ ...prev, [service.name]: e.target.value }))}
+                        className="flex-1 border border-gray-300 rounded-md px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-blue-400"
+                      />
+                      {service.priceType === 'per_day' && <span className="text-xs text-gray-500">/ día</span>}
+                    </div>
+                  </div>
+                ))}
+              </div>
+            </div>
+          )}
+
+          {/* Campos personalizados de la licitación */}
+          {data?.customFields?.length > 0 && (
+            <div className="mt-4 border-t border-gray-200 pt-4">
+              <h4 className="font-semibold text-gray-800 mb-3">Información Adicional Requerida</h4>
+              <div className="flex flex-col gap-4">
+                {data.customFields.map((field, i) => (
+                  <div key={i} className="flex flex-col gap-1">
+                    <label className="text-sm font-medium text-gray-700">
+                      {field.label}
+                      {field.required && <span className="text-red-500 ml-1">*</span>}
+                    </label>
+                    {field.placeholder && <p className="text-xs text-gray-400">{field.placeholder}</p>}
+
+                    {field.type === 'text' && (
+                      <input
+                        type="text"
+                        value={customFieldAnswers[field.label] ?? ""}
+                        onChange={(e) => setCustomFieldAnswers(prev => ({ ...prev, [field.label]: e.target.value }))}
+                        className="border border-gray-300 rounded-md px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-blue-400"
+                      />
+                    )}
+                    {field.type === 'textarea' && (
+                      <textarea
+                        rows={3}
+                        value={customFieldAnswers[field.label] ?? ""}
+                        onChange={(e) => setCustomFieldAnswers(prev => ({ ...prev, [field.label]: e.target.value }))}
+                        className="border border-gray-300 rounded-md px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-blue-400"
+                      />
+                    )}
+                    {field.type === 'number' && (
+                      <input
+                        type="number"
+                        value={customFieldAnswers[field.label] ?? ""}
+                        onChange={(e) => setCustomFieldAnswers(prev => ({ ...prev, [field.label]: e.target.value }))}
+                        className="border border-gray-300 rounded-md px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-blue-400"
+                      />
+                    )}
+                    {field.type === 'date' && (
+                      <input
+                        type="date"
+                        value={customFieldAnswers[field.label] ?? ""}
+                        onChange={(e) => setCustomFieldAnswers(prev => ({ ...prev, [field.label]: e.target.value }))}
+                        className="border border-gray-300 rounded-md px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-blue-400"
+                      />
+                    )}
+                    {field.type === 'select' && (
+                      <select
+                        value={customFieldAnswers[field.label] ?? ""}
+                        onChange={(e) => setCustomFieldAnswers(prev => ({ ...prev, [field.label]: e.target.value }))}
+                        className="border border-gray-300 rounded-md px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-blue-400 bg-white"
+                      >
+                        <option value="">Seleccionar...</option>
+                        {field.options?.map((opt, oi) => <option key={oi} value={opt}>{opt}</option>)}
+                      </select>
+                    )}
+                    {field.type === 'radio' && (
+                      <div className="flex flex-col gap-2">
+                        {field.options?.map((opt, oi) => (
+                          <label key={oi} className="flex items-center gap-2 text-sm cursor-pointer">
+                            <input
+                              type="radio"
+                              name={`field_${i}`}
+                              value={opt}
+                              checked={customFieldAnswers[field.label] === opt}
+                              onChange={() => setCustomFieldAnswers(prev => ({ ...prev, [field.label]: opt }))}
+                            />
+                            {opt}
+                          </label>
+                        ))}
+                      </div>
+                    )}
+                  </div>
+                ))}
+              </div>
+            </div>
+          )}
+
           <div className="pt-3">
             <div className="flex justify-around">
               <button
