@@ -370,6 +370,7 @@ export function ProposalModal({open, handleOpen, data}) {
             data.customFields.map((f) => ({
               label: f.label,
               type: f.type,
+              options: f.options || [],
               value: "",
             }))
           );
@@ -554,9 +555,55 @@ export function ProposalModal({open, handleOpen, data}) {
                       <option value="true">Sí</option>
                       <option value="false">No</option>
                     </select>
+                  ) : f.type === 'select' ? (
+                    <select
+                      className="border border-gray-300 rounded-md p-1 text-sm w-full mt-1"
+                      value={f.value}
+                      onChange={(e) => {
+                        const updated = [...customFieldAnswers];
+                        updated[i] = { ...updated[i], value: e.target.value };
+                        setCustomFieldAnswers(updated);
+                      }}
+                    >
+                      <option value="">Seleccionar...</option>
+                      {(f.options || []).map((opt, oi) => (
+                        <option key={oi} value={opt}>{opt}</option>
+                      ))}
+                    </select>
+                  ) : f.type === 'radio' ? (
+                    <div className="flex flex-col gap-1 mt-1">
+                      {(f.options || []).map((opt, oi) => (
+                        <label key={oi} className="flex items-center gap-2 text-sm cursor-pointer">
+                          <input
+                            type="radio"
+                            name={`radio_field_${i}`}
+                            value={opt}
+                            checked={f.value === opt}
+                            onChange={() => {
+                              const updated = [...customFieldAnswers];
+                              updated[i] = { ...updated[i], value: opt };
+                              setCustomFieldAnswers(updated);
+                            }}
+                            className="accent-primary-600"
+                          />
+                          {opt}
+                        </label>
+                      ))}
+                    </div>
+                  ) : f.type === 'textarea' ? (
+                    <textarea
+                      rows={3}
+                      className="border border-gray-300 rounded-md p-1 text-sm w-full mt-1"
+                      value={f.value}
+                      onChange={(e) => {
+                        const updated = [...customFieldAnswers];
+                        updated[i] = { ...updated[i], value: e.target.value };
+                        setCustomFieldAnswers(updated);
+                      }}
+                    />
                   ) : (
                     <input
-                      type={f.type === 'number' ? 'number' : 'text'}
+                      type={f.type === 'number' ? 'number' : f.type === 'date' ? 'date' : 'text'}
                       className="border border-gray-300 rounded-md p-1 text-sm w-full mt-1"
                       value={f.value}
                       onChange={(e) => {
