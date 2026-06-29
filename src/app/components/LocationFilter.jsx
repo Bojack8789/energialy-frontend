@@ -14,7 +14,8 @@ function LocationFilter() {
   const path = usePathname();
   const [checkedLocations, setCheckedLocations] = useState([]);
   const {data, error, isLoading} = useGetLocationsQuery()
-  
+  const locations = Array.isArray(data) ? data : (data?.value ?? []);
+
   const handleChecked = (e) => {
   
     if(e.target.checked){
@@ -52,7 +53,7 @@ function LocationFilter() {
   return (
     <div>
       {isLoading && <p>Cargando...</p>}
-      {data?.value?.map((item) => (
+      {locations?.map((item) => (
         <div key={item.id}>
           <input
             type="checkbox"

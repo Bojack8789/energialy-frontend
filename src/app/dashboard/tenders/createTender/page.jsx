@@ -37,8 +37,8 @@ function CreateTenderForm() {
   // Usar datos de ejemplo si no hay conectividad
   const displayCategories =
     categories && categories.length > 0 ? categories : exampleCategories;
-  const displayLocations =
-    locations?.value?.length > 0 ? locations.value : exampleLocations;
+  const locationsArray = Array.isArray(locations) ? locations : (locations?.value ?? []);
+  const displayLocations = locationsArray.length > 0 ? locationsArray : exampleLocations;
 
   const userData = getLocalStorage();
 
