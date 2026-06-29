@@ -42,8 +42,8 @@ function TextModal({ open, handleOpen, id, company, status, endpoint }) {
   return (
     <>
       {open && (
-        <div className="fixed inset-0 bg-black/50 backdrop-blur-sm flex justify-center items-center z-50">
-          <div className="bg-white px-1 py-5 rounded flex flex-col justify-center items-center gap-5 h-screem">
+        <div className="fixed inset-0 bg-black/50 backdrop-blur-sm flex justify-center items-start overflow-y-auto z-50 py-6">
+          <div className="bg-white px-1 py-5 rounded flex flex-col justify-center items-center gap-5 my-auto">
             <p>Por favor indica los motivos de la revisión</p>
             <textarea
               name="review"

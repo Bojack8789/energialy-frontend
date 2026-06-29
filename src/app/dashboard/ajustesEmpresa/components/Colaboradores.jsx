@@ -405,8 +405,8 @@ export default function Colaboradores() {
           )}
         </div>        {/* Add Collaborator Modal */}
         {showAddModal && (
-          <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50 p-4">
-            <div className="bg-white rounded-lg p-4 sm:p-6 w-full max-w-2xl mx-4 max-h-[90vh] overflow-y-auto">
+          <div className="fixed inset-0 bg-black bg-opacity-50 flex items-start justify-center overflow-y-auto z-50 py-6 px-4">
+            <div className="bg-white rounded-lg p-4 sm:p-6 w-full max-w-2xl mx-4 max-h-[90vh] overflow-y-auto my-auto">
               <div className="flex justify-between items-center mb-4">
                 <h3 className="text-lg font-semibold">Agregar Nuevo Colaborador</h3>
                 <button
@@ -514,8 +514,8 @@ export default function Colaboradores() {
       </div>
       {/* Edit Permissions Modal */}
       {editingCollaborator && (
-        <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50 p-4">
-          <div className="bg-white rounded-lg p-4 sm:p-6 w-full max-w-2xl mx-4 max-h-[90vh] overflow-y-auto">
+        <div className="fixed inset-0 bg-black bg-opacity-50 flex items-start justify-center overflow-y-auto z-50 py-6 px-4">
+          <div className="bg-white rounded-lg p-4 sm:p-6 w-full max-w-2xl mx-4 max-h-[90vh] overflow-y-auto my-auto">
             <div className="flex justify-between items-center mb-4">
               <div>
                 <h3 className="text-lg font-semibold">Editar Permisos</h3>

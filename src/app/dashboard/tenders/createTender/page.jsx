@@ -1177,8 +1177,8 @@ function CreateTenderForm() {
 
         {/* Modal para crear campo personalizado */}
         {showCustomFieldModal && (
-          <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50">
-            <div className="bg-white rounded-lg p-6 w-full max-w-md mx-4 max-h-[80vh] overflow-y-auto">
+          <div className="fixed inset-0 bg-black bg-opacity-50 flex items-start justify-center overflow-y-auto z-50 py-6">
+            <div className="bg-white rounded-lg p-6 w-full max-w-md mx-4 max-h-[80vh] overflow-y-auto my-auto">
               <h3 className="text-lg font-semibold mb-4">
                 Agregar Campo Personalizado
               </h3>
