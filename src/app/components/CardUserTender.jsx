@@ -135,7 +135,15 @@ function CardUserTender({item}) {
 
           <button
             type="button"
-            className="flex-1 rounded-lg bg-gray-600 px-6 py-3 text-sm font-medium leading-normal text-white shadow-sm hover:bg-gray-700 active:bg-gray-800 transition-all duration-200 focus:outline-none focus:ring-2 focus:ring-gray-600 focus:ring-offset-2"
+            className="flex-1 rounded-lg border-2 border-[#191654] bg-white px-6 py-3 text-sm font-medium leading-normal text-[#191654] hover:bg-[#191654] hover:text-white active:bg-[#141240] transition-all duration-200 focus:outline-none focus:ring-2 focus:ring-[#191654] focus:ring-offset-2"
+            onClick={() => router.push(`/dashboard/tenders/edit/${item.id}`)}
+          >
+            Editar
+          </button>
+
+          <button
+            type="button"
+            className="flex-1 rounded-lg border-2 border-gray-300 bg-white px-6 py-3 text-sm font-medium leading-normal text-gray-700 hover:bg-gray-100 active:bg-gray-200 transition-all duration-200 focus:outline-none focus:ring-2 focus:ring-gray-400 focus:ring-offset-2"
             onClick={() => setShowInvitations(!showInvitations)}
           >
             {showInvitations ? 'Ocultar Invitaciones' : 'Gestionar Invitaciones'}

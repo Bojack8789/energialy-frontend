@@ -1,143 +1,38 @@
 "use client";
 
-// Suscripciones.jsx — VERSIÓN FINAL
-// - Precios correctos: BASE $29, PLUS $69
-// - Lee el plan activo real desde la API (no hardcodeado)
-// - Lee los planes disponibles desde la API (no hardcodeados)
-// - Muestra badge del plan actual con días restantes
-
 import React, { useState, useEffect } from "react";
-import { ToastContainer } from "react-toastify";
-import "react-toastify/dist/ReactToastify.css";
 
-const PLAN_COLORS = {
-  GRATIS: { bg: '#F1EFE8', color: '#5F5E5A' },
-  BASE:   { bg: '#E6F1FB', color: '#185FA5' },
-  PLUS:   { bg: '#E1F5EE', color: '#0F6E56' },
-};
+const CheckIcon = () => (
+  <svg className="w-5 h-5 text-green-500 flex-shrink-0 mt-0.5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M5 13l4 4L19 7" />
+  </svg>
+);
 
-// Links de MercadoPago por plan y período (se mantienen los actuales hasta configurar webhook)
-const MP_LINKS = {
-  BASE: {
-    MENSUAL:   'https://www.mercadopago.com.ar/subscriptions/checkout?preapproval_plan_id=2c9380848c5ac783018c5b75641d0088',
-    SEMESTRAL: 'https://www.mercadopago.com.ar/subscriptions/checkout?preapproval_plan_id=2c9380848c5ac790018c5b74aa7b008a',
-  },
-  PLUS: {
-    MENSUAL:   'https://www.mercadopago.com.ar/subscriptions/checkout?preapproval_plan_id=2c9380847b62931d017b88b8f4931d36',
-    SEMESTRAL: 'https://www.mercadopago.com.ar/subscriptions/checkout?preapproval_plan_id=2c9380848c5ac783018c5b71ed4c0084',
-  },
-};
+const XIcon = () => (
+  <svg className="w-5 h-5 text-red-500 flex-shrink-0 mt-0.5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M6 18L18 6M6 6l12 12" />
+  </svg>
+);
 
-// Precios correctos (fuente de verdad hasta que el admin los edite desde la DB)
-const PLAN_PRICES = {
-  GRATIS: { MENSUAL: null, SEMESTRAL: null },
-  BASE:   { MENSUAL: 29,  SEMESTRAL: 145 },  // 5 meses al precio de 6
-  PLUS:   { MENSUAL: 69,  SEMESTRAL: 345 },
-};
+const StarIcon = () => (
+  <svg className="w-5 h-5 text-purple-500 flex-shrink-0 mt-0.5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M5 3v4M3 5h4M6 17v4m-2-2h4m5-16l2.286 6.857L21 12l-5.714 2.143L13 21l-2.286-6.857L5 12l5.714-2.143L13 3z" />
+  </svg>
+);
 
-// Tarjeta de plan individual
-const PlanCard = ({ plan, selected, period, onSelect }) => {
-  const colors = PLAN_COLORS[plan.name] || PLAN_COLORS.GRATIS;
-  const price  = PLAN_PRICES[plan.name]?.[period];
-  const isSelected = selected === plan.name;
-
-  // Parsea features del string separado por comas
-  const features = plan.features
-    ? plan.features.split(',').map(f => f.trim()).filter(Boolean)
-    : [];
-
-  return (
-    <div
-      onClick={onSelect}
-      style={{
-        flex: '1 1 0',
-        border: isSelected ? `2px solid ${colors.color}` : '0.5px solid var(--color-border-tertiary, #e0e0e0)',
-        borderRadius: 8,
-        cursor: 'pointer',
-        overflow: 'hidden',
-        transition: 'border-color .15s',
-        background: 'white',
-      }}
-    >
-      {/* Header */}
-      <div style={{
-        padding: '16px 20px',
-        background: isSelected ? colors.bg : '#F9F9F9',
-        borderBottom: '0.5px solid #e0e0e0',
-      }}>
-        <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
-          <span style={{ fontSize: 13, fontWeight: 500, color: colors.color }}>{plan.name}</span>
-          {price !== null ? (
-            <span style={{ fontSize: 20, fontWeight: 500 }}>
-              U$D {price}
-              <span style={{ fontSize: 12, fontWeight: 400, color: '#888' }}>/mes</span>
-            </span>
-          ) : (
-            <span style={{ fontSize: 20, fontWeight: 500, color: colors.color }}>Gratis</span>
-          )}
-        </div>
-        {period === 'SEMESTRAL' && price !== null && (
-          <div style={{ fontSize: 11, color: '#888', marginTop: 4 }}>
-            U$D {price * 6} / semestre · 1 mes bonificado
-          </div>
-        )}
-      </div>
-
-      {/* Features */}
-      <div style={{ padding: '14px 20px' }}>
-        <ul style={{ margin: 0, padding: 0, listStyle: 'none' }}>
-          {features.map((f, i) => (
-            <li key={i} style={{ fontSize: 12, color: '#555', marginBottom: 6, display: 'flex', gap: 8 }}>
-              <span style={{ color: colors.color, flexShrink: 0 }}>✓</span>
-              {f}
-            </li>
-          ))}
-        </ul>
-      </div>
-    </div>
-  );
-};
-
-const SubscriptionBlocks = () => {
-  const [period, setPeriod]             = useState('MENSUAL');
-  const [selectedPlan, setSelectedPlan] = useState('');
-  const [error, setError]               = useState('');
-  const [plans, setPlans]               = useState([]);
-  const [currentPlan, setCurrentPlan]   = useState(null);
-  const [daysLeft, setDaysLeft]         = useState(null);
-  const [loading, setLoading]           = useState(true);
+const Suscripciones = () => {
+  const [currentPlan, setCurrentPlan] = useState(null);
+  const [loadingPlan, setLoadingPlan] = useState(null);
+  const [loading, setLoading] = useState(true);
+  const [daysLeft, setDaysLeft] = useState(null);
 
   const baseUrl = process.env.NEXT_PUBLIC_BASE_URL;
 
-  // Cargar planes disponibles desde la API
-  useEffect(() => {
-    const fetchPlans = async () => {
-      try {
-        const token = sessionStorage.getItem('accessToken');
-        const res = await fetch(`${baseUrl}/subscriptions`, {
-          headers: { Authorization: `Bearer ${token}` },
-        });
-        if (!res.ok) throw new Error();
-        const data = await res.json();
-        // Solo planes activos, no pausados, ordenados por precio
-        const available = data
-          .filter(p => p.isActive && !p.isPaused)
-          .sort((a, b) => a.price - b.price);
-        setPlans(available);
-      } catch {
-        // fallback: mostrar igual con datos estáticos si falla la API
-        setPlans([]);
-      }
-    };
-    fetchPlans();
-  }, []);
-
-  // Cargar plan actual de la empresa
   useEffect(() => {
     const fetchCurrentPlan = async () => {
       try {
-        const companyId = sessionStorage.getItem('companyId');
-        const token     = sessionStorage.getItem('accessToken');
+        const companyId = sessionStorage.getItem("companyId");
+        const token = sessionStorage.getItem("accessToken");
         if (!companyId || !token) { setLoading(false); return; }
 
         const res = await fetch(
@@ -148,21 +43,19 @@ const SubscriptionBlocks = () => {
         const data = await res.json();
 
         const now = new Date();
-        const active = data.find(s =>
-          s.isActive &&
-          s.status === 'active' &&
-          new Date(s.endDate) >= now
+        const active = data.find(
+          (s) => s.isActive && s.status === "active" && new Date(s.endDate) >= now
         );
 
         if (active?.Subscription) {
-          setCurrentPlan(active.Subscription.name);
+          setCurrentPlan(active.Subscription.code);
           const days = Math.ceil((new Date(active.endDate) - now) / (1000 * 60 * 60 * 24));
           setDaysLeft(Math.max(0, days));
         } else {
-          setCurrentPlan('GRATIS');
+          setCurrentPlan("free");
         }
       } catch {
-        setCurrentPlan('GRATIS');
+        setCurrentPlan("free");
       } finally {
         setLoading(false);
       }
@@ -170,118 +63,142 @@ const SubscriptionBlocks = () => {
     fetchCurrentPlan();
   }, []);
 
-  const handleSubmit = () => {
-    if (!selectedPlan) { setError('Seleccioná un plan para continuar.'); return; }
-    setError('');
-
-    if (selectedPlan === 'GRATIS') {
-      setError('Ya tenés el plan Gratuito activo.'); return;
+  const handleSubscribe = async (planCode) => {
+    try {
+      setLoadingPlan(planCode);
+      const token = sessionStorage.getItem("accessToken");
+      const res = await fetch(`${baseUrl}/checkout`, {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json",
+          Authorization: `Bearer ${token}`,
+        },
+        body: JSON.stringify({ planCode }),
+      });
+      if (!res.ok) throw new Error();
+      const data = await res.json();
+      if (data.checkoutUrl) window.location.href = data.checkoutUrl;
+    } catch {
+      alert("Error al procesar el pago. Intentá nuevamente.");
+    } finally {
+      setLoadingPlan(null);
     }
-    if (selectedPlan === currentPlan) {
-      setError(`Ya estás suscripto al plan ${currentPlan}.`); return;
-    }
-
-    const link = MP_LINKS[selectedPlan]?.[period];
-    if (link) window.open(link, '_blank');
-    else setError('No se encontró el link de pago. Contactá a soporte.');
   };
 
-  const planColors = PLAN_COLORS[currentPlan] || PLAN_COLORS.GRATIS;
+  const planName = currentPlan === "free" ? "GRATIS" : currentPlan === "base" ? "BASE" : currentPlan === "plus" ? "PLUS" : null;
 
   return (
-    <div className="text-primary-500">
-      <ToastContainer />
-
+    <div className="p-4 sm:p-6">
       {/* Plan actual */}
-      <div style={{ margin: '8px 8px 16px', padding: '12px 16px', border: '0.5px solid #e0e0e0', borderRadius: 8, display: 'flex', alignItems: 'center', justifyContent: 'space-between' }}>
-        <span style={{ fontSize: 14 }}>
-          Tu suscripción actual:{' '}
-          {loading ? (
-            <span style={{ color: '#888' }}>cargando...</span>
-          ) : (
-            <span style={{ fontWeight: 500, padding: '2px 10px', borderRadius: 99, background: planColors.bg, color: planColors.color }}>
-              {currentPlan || 'GRATIS'}
+      {!loading && planName && (
+        <div className="mb-6 flex items-center justify-between p-3 bg-gray-50 border border-gray-200 rounded-lg">
+          <span className="text-sm text-gray-700">
+            Tu suscripción actual:{" "}
+            <span className={`font-semibold px-2 py-0.5 rounded-full text-xs ${
+              currentPlan === "free" ? "bg-gray-100 text-gray-700" :
+              currentPlan === "base" ? "bg-blue-100 text-blue-700" :
+              "bg-purple-100 text-purple-700"
+            }`}>
+              {planName}
+            </span>
+          </span>
+          {daysLeft !== null && (
+            <span className={`text-xs ${daysLeft <= 7 ? "text-red-600 font-semibold" : "text-gray-500"}`}>
+              {daysLeft <= 7 ? `⚠ vence en ${daysLeft} días` : `${daysLeft} días restantes`}
             </span>
           )}
-        </span>
-        {daysLeft !== null && (
-          <span style={{ fontSize: 12, color: daysLeft <= 7 ? '#993C1D' : '#888' }}>
-            {daysLeft <= 7 ? `⚠ vence en ${daysLeft} días` : `${daysLeft} días restantes`}
-          </span>
-        )}
-      </div>
-
-      {/* Selector de período */}
-      <div style={{ display: 'flex', gap: 8, padding: '0 8px', marginBottom: 16 }}>
-        {['MENSUAL', 'SEMESTRAL'].map(p => (
-          <button
-            key={p}
-            onClick={() => setPeriod(p)}
-            style={{
-              flex: 1, padding: '10px 0', fontSize: 13, fontWeight: 500,
-              border: '0.5px solid',
-              borderColor: period === p ? '#191654' : '#e0e0e0',
-              background: period === p ? '#191654' : 'transparent',
-              color: period === p ? 'white' : 'inherit',
-              borderRadius: 6, cursor: 'pointer', transition: 'all .15s',
-            }}
-          >
-            {p}{p === 'SEMESTRAL' ? ' · 1 mes GRATIS' : ''}
-          </button>
-        ))}
-      </div>
-
-      {/* Tarjetas de planes */}
-      <div style={{ display: 'flex', gap: 12, padding: '0 8px', marginBottom: 16 }}>
-        {plans.length > 0
-          ? plans.map(plan => (
-              <PlanCard
-                key={plan.id}
-                plan={plan}
-                selected={selectedPlan}
-                period={period}
-                onSelect={() => setSelectedPlan(plan.name)}
-              />
-            ))
-          : /* Fallback estático si la API falla */ ['GRATIS', 'BASE', 'PLUS'].map(name => (
-              <PlanCard
-                key={name}
-                plan={{
-                  name,
-                  features: name === 'GRATIS'
-                    ? 'Licitaciones ilimitadas,Invitaciones ilimitadas,Directorio de empresas,Búsqueda de Proveedores'
-                    : name === 'BASE'
-                    ? 'Todo el plan GRATIS,Licitaciones Privadas,Ocultar Presupuesto,30 Propuestas activas,Fee 2.5% por licitación ganada'
-                    : 'Todo el plan BASE,Propuestas ilimitadas,Destacado en el Directorio,Fee 1% por licitación ganada,Soporte prioritario',
-                }}
-                selected={selectedPlan}
-                period={period}
-                onSelect={() => setSelectedPlan(name)}
-              />
-            ))
-        }
-      </div>
-
-      {error && (
-        <div style={{ margin: '0 8px 12px', padding: '10px 14px', background: '#FAECE7', border: '0.5px solid #F5C4B3', borderRadius: 6, fontSize: 13, color: '#993C1D' }}>
-          {error}
         </div>
       )}
 
-      <div style={{ padding: '0 8px 16px', textAlign: 'right' }}>
-        <button
-          onClick={handleSubmit}
-          style={{
-            padding: '10px 28px', fontSize: 14, fontWeight: 500,
-            background: '#191654', color: 'white',
-            border: 'none', borderRadius: 6, cursor: 'pointer',
-          }}
-        >
-          Continuar al pago →
-        </button>
+      <p className="text-sm sm:text-base text-gray-600 text-center mb-6 sm:mb-8">
+        Planes de Suscripción
+      </p>
+
+      <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 gap-4 sm:gap-6">
+        {/* Plan GRATIS */}
+        <div className="border-2 border-gray-200 rounded-lg p-6 hover:border-gray-400 transition-colors">
+          <div className="text-center">
+            <h3 className="text-xl font-bold text-gray-800 mb-2">GRATIS</h3>
+            <div className="text-3xl font-bold text-gray-900 mb-1">USD 0</div>
+            <p className="text-gray-500 text-sm mb-6">Por mes</p>
+          </div>
+          <ul className="space-y-3 mb-6">
+            <li className="flex items-start gap-2 text-sm text-gray-700"><CheckIcon /><span>Licitaciones públicas ilimitadas</span></li>
+            <li className="flex items-start gap-2 text-sm text-gray-700"><CheckIcon /><span>Invitaciones para licitar ilimitadas</span></li>
+            <li className="flex items-start gap-2 text-sm text-gray-700"><CheckIcon /><span>Hasta 3 propuestas activas</span></li>
+            <li className="flex items-start gap-2 text-sm text-gray-500"><XIcon /><span>Sin licitaciones privadas</span></li>
+            <li className="flex items-start gap-2 text-sm text-gray-500"><XIcon /><span>No puede ocultar presupuesto</span></li>
+          </ul>
+          {currentPlan === "free" && (
+            <div className="bg-gray-100 text-gray-700 text-center py-2 rounded-lg font-semibold text-sm">
+              Plan Actual
+            </div>
+          )}
+        </div>
+
+        {/* Plan BASE */}
+        <div className="border-2 border-blue-400 rounded-lg p-6 hover:border-blue-500 transition-colors relative">
+          <div className="absolute -top-3 left-1/2 transform -translate-x-1/2">
+            <span className="bg-blue-500 text-white px-3 py-1 rounded-full text-xs font-semibold">Popular</span>
+          </div>
+          <div className="text-center">
+            <h3 className="text-xl font-bold text-blue-600 mb-2">BASE</h3>
+            <div className="text-3xl font-bold text-gray-900 mb-1">USD 49</div>
+            <p className="text-gray-500 text-sm mb-6">Por mes</p>
+          </div>
+          <ul className="space-y-3 mb-6">
+            <li className="flex items-start gap-2 text-sm text-gray-700"><CheckIcon /><span>Licitaciones ilimitadas</span></li>
+            <li className="flex items-start gap-2 text-sm text-gray-700"><CheckIcon /><span>Licitaciones privadas</span></li>
+            <li className="flex items-start gap-2 text-sm text-gray-700"><CheckIcon /><span>Invitaciones ilimitadas</span></li>
+            <li className="flex items-start gap-2 text-sm text-gray-700"><CheckIcon /><span>Hasta 30 propuestas activas</span></li>
+            <li className="flex items-start gap-2 text-sm text-gray-700"><CheckIcon /><span>Ocultar presupuesto</span></li>
+          </ul>
+          {currentPlan === "base" ? (
+            <div className="bg-blue-100 text-blue-700 text-center py-2 rounded-lg font-semibold text-sm">
+              Plan Actual
+            </div>
+          ) : (
+            <button
+              onClick={() => handleSubscribe("base")}
+              disabled={loadingPlan === "base"}
+              className="w-full bg-blue-500 hover:bg-blue-600 disabled:opacity-60 text-white py-2 rounded-lg font-semibold transition-colors text-sm"
+            >
+              {loadingPlan === "base" ? "Redirigiendo..." : "Elegir plan"}
+            </button>
+          )}
+        </div>
+
+        {/* Plan PLUS */}
+        <div className="border-2 border-purple-400 rounded-lg p-6 hover:border-purple-500 transition-colors">
+          <div className="text-center">
+            <h3 className="text-xl font-bold text-purple-600 mb-2">PLUS</h3>
+            <div className="text-3xl font-bold text-gray-900 mb-1">USD 69</div>
+            <p className="text-gray-500 text-sm mb-6">Por mes</p>
+          </div>
+          <ul className="space-y-3 mb-6">
+            <li className="flex items-start gap-2 text-sm text-gray-700"><StarIcon /><span className="font-semibold">Destacado en directorio</span></li>
+            <li className="flex items-start gap-2 text-sm text-gray-700"><CheckIcon /><span>Licitaciones ilimitadas</span></li>
+            <li className="flex items-start gap-2 text-sm text-gray-700"><CheckIcon /><span>Licitaciones privadas</span></li>
+            <li className="flex items-start gap-2 text-sm text-gray-700"><CheckIcon /><span>Propuestas activas ilimitadas</span></li>
+            <li className="flex items-start gap-2 text-sm text-gray-700"><CheckIcon /><span>Ocultar presupuesto</span></li>
+          </ul>
+          {currentPlan === "plus" ? (
+            <div className="bg-purple-100 text-purple-700 text-center py-2 rounded-lg font-semibold text-sm">
+              Plan Actual
+            </div>
+          ) : (
+            <button
+              onClick={() => handleSubscribe("plus")}
+              disabled={loadingPlan === "plus"}
+              className="w-full bg-purple-500 hover:bg-purple-600 disabled:opacity-60 text-white py-2 rounded-lg font-semibold transition-colors text-sm"
+            >
+              {loadingPlan === "plus" ? "Redirigiendo..." : "Elegir plan"}
+            </button>
+          )}
+        </div>
       </div>
     </div>
   );
 };
 
-export default SubscriptionBlocks;
+export default Suscripciones;
