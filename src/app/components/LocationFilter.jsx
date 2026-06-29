@@ -52,7 +52,7 @@ function LocationFilter() {
   return (
     <div>
       {isLoading && <p>Cargando...</p>}
-      {data?.map((item) => (
+      {data?.value?.map((item) => (
         <div key={item.id}>
           <input
             type="checkbox"

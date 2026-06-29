@@ -24,6 +24,7 @@ function TenderDetail({params}) {
   const [selectedProposal, setSelectedProposal] = useState(null);
   const [actionType, setActionType] = useState('');
   const [profileCompany, setProfileCompany] = useState(null);
+  const [expandedProposalId, setExpandedProposalId] = useState(null);
 
   const companyId = user?.company?.id;
   const { data: proposals } = useGetProposalsQuery(companyId);
@@ -277,6 +278,48 @@ function TenderDetail({params}) {
                               <strong>Duración:</strong> {proposal.projectDuration} días
                             </span>
                           </div>
+                          {/* Botón expandir detalles */}
+                          <button
+                            onClick={() => setExpandedProposalId(expandedProposalId === proposal.id ? null : proposal.id)}
+                            className="mt-2 text-xs text-secondary-600 underline"
+                          >
+                            {expandedProposalId === proposal.id ? '▲ Ocultar detalle' : '▼ Ver cotización de servicios'}
+                          </button>
+
+                          {/* Panel expandible */}
+                          {expandedProposalId === proposal.id && (
+                            <div className="mt-3 p-3 bg-gray-50 rounded-md border border-gray-200 text-sm space-y-3">
+                              {proposal.servicePriceQuotes?.length > 0 && (
+                                <div>
+                                  <p className="font-semibold text-gray-700 mb-2">Cotización de Servicios:</p>
+                                  <div className="grid grid-cols-3 gap-1 text-xs font-medium text-gray-500 mb-1">
+                                    <span>Servicio</span><span>Referencia</span><span>Cotizado</span>
+                                  </div>
+                                  {proposal.servicePriceQuotes.map((s, i) => (
+                                    <div key={i} className="grid grid-cols-3 gap-1 text-xs text-gray-700 py-1 border-t border-gray-100">
+                                      <span className="font-medium">{s.name}</span>
+                                      <span>U$D {s.referencePrice} / {s.priceType === 'per_day' ? 'día' : 'fijo'}</span>
+                                      <span className="font-semibold text-secondary-600">U$D {s.quotedPrice}</span>
+                                    </div>
+                                  ))}
+                                </div>
+                              )}
+                              {proposal.customFieldAnswers?.length > 0 && (
+                                <div>
+                                  <p className="font-semibold text-gray-700 mb-2">Respuestas a campos personalizados:</p>
+                                  {proposal.customFieldAnswers.map((f, i) => (
+                                    <div key={i} className="text-xs text-gray-700 py-1 border-t border-gray-100">
+                                      <span className="font-medium">{f.label}:</span> {f.value?.toString() || '—'}
+                                    </div>
+                                  ))}
+                                </div>
+                              )}
+                              {(!proposal.servicePriceQuotes?.length && !proposal.customFieldAnswers?.length) && (
+                                <p className="text-xs text-gray-500">Sin datos adicionales.</p>
+                              )}
+                            </div>
+                          )}
+
                           {/* Badge de estado */}
                           <div className="mt-2">
                             {proposal.status === 'sent' && (

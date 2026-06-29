@@ -352,7 +352,7 @@ export function ProposalModal({open, handleOpen, data}) {
         }
       }, [data?.id, userData?.company?.id])
 
-  if (!data || !data.company) return null;
+  if (!data) return null;
 
   return (
     <>
