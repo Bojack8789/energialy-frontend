@@ -45,7 +45,7 @@ export default function EditTenderForm({ params }) {
   const displayCategories =
     categories && categories.length > 0 ? categories : exampleCategories;
   const displayLocations =
-    locations && locations.length > 0 ? locations : exampleLocations;
+    locations?.value?.length > 0 ? locations.value : exampleLocations;
 
   const { data: metricsData } = useGetCompanyMetricsQuery(
     { companyId: userData?.company?.id },

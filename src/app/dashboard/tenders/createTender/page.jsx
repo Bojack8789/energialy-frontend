@@ -38,7 +38,7 @@ function CreateTenderForm() {
   const displayCategories =
     categories && categories.length > 0 ? categories : exampleCategories;
   const displayLocations =
-    locations && locations.length > 0 ? locations : exampleLocations;
+    locations?.value?.length > 0 ? locations.value : exampleLocations;
 
   const userData = getLocalStorage();
 
@@ -451,8 +451,10 @@ function CreateTenderForm() {
             })
           );
         }
-        // Eliminar customFields del payload porque la tabla Tenders no lo soporta
-        delete payload.customFields;
+        // Limpiar customFields (remover id temporal)
+        if (Array.isArray(payload.customFields)) {
+          payload.customFields = payload.customFields.map(({ id, ...rest }) => rest);
+        }
 
         // Obtener el token de autenticación
         const accessToken = typeof window !== 'undefined' ? sessionStorage.getItem('accessToken') : null;

@@ -102,6 +102,8 @@ export function ProposalModal({open, handleOpen, data}) {
     const [serviceFeePercentage, setServiceFeePercentage] = useState(1);
     const [serviceAmount, setServiceAmount] = useState(0);
     const [receiverAmount, setReceiverAmount] = useState(0);
+    const [servicePriceQuotes, setServicePriceQuotes] = useState([]);
+    const [customFieldAnswers, setCustomFieldAnswers] = useState([]);
     const [limitExceededModal, setLimitExceededModal] = useState({
       isOpen: false,
       limitInfo: null,
@@ -326,8 +328,15 @@ export function ProposalModal({open, handleOpen, data}) {
           return;
         }
 
-        console.log('Sending proposal:', proposal);
-        createProposal(proposal);
+        const fullProposal = {
+          ...proposal,
+          servicePriceQuotes: servicePriceQuotes.map((s) => ({
+            ...s,
+            quotedPrice: parseFloat(s.quotedPrice) || 0,
+          })),
+          customFieldAnswers,
+        };
+        createProposal(fullProposal);
     }
   
     const optionDuration = [
@@ -345,10 +354,25 @@ export function ProposalModal({open, handleOpen, data}) {
             tenderId: data.id,
             companyId: userData.company.id,
           }));
-          console.log('ProposalModal - Setting IDs:', {
-            tenderId: data.id,
-            companyId: userData.company.id
-          });
+        }
+        if (data?.servicePrices?.length > 0) {
+          setServicePriceQuotes(
+            data.servicePrices.map((s) => ({
+              name: s.name,
+              referencePrice: s.price,
+              priceType: s.priceType,
+              quotedPrice: "",
+            }))
+          );
+        }
+        if (data?.customFields?.length > 0) {
+          setCustomFieldAnswers(
+            data.customFields.map((f) => ({
+              label: f.label,
+              type: f.type,
+              value: "",
+            }))
+          );
         }
       }, [data?.id, userData?.company?.id])
 
@@ -478,6 +502,75 @@ export function ProposalModal({open, handleOpen, data}) {
               {/* <UploadthingButton/> */}
             </div>
           </div>
+          {/* Cotización de servicios */}
+          {servicePriceQuotes.length > 0 && (
+            <div className="mt-4">
+              <h6 className="font-semibold text-gray-700 mb-2">Cotización de Servicios</h6>
+              <div className="grid grid-cols-4 gap-2 text-xs font-medium text-gray-500 mb-1 px-1">
+                <span>Servicio</span>
+                <span>Descripción</span>
+                <span>Precio referencia</span>
+                <span>Tu precio (USD)</span>
+              </div>
+              {servicePriceQuotes.map((s, i) => (
+                <div key={i} className="grid grid-cols-4 gap-2 items-center mb-2">
+                  <span className="text-sm font-medium">{s.name}</span>
+                  <span className="text-xs text-gray-500">{data.servicePrices[i]?.description}</span>
+                  <span className="text-sm text-gray-600">USD {s.referencePrice} / {s.priceType === 'per_day' ? 'día' : 'fijo'}</span>
+                  <input
+                    type="number"
+                    placeholder="USD"
+                    className="border border-gray-300 rounded-md p-1 text-sm"
+                    value={s.quotedPrice}
+                    onChange={(e) => {
+                      const updated = [...servicePriceQuotes];
+                      updated[i] = { ...updated[i], quotedPrice: e.target.value };
+                      setServicePriceQuotes(updated);
+                    }}
+                  />
+                </div>
+              ))}
+            </div>
+          )}
+
+          {/* Campos personalizados */}
+          {customFieldAnswers.length > 0 && (
+            <div className="mt-4">
+              <h6 className="font-semibold text-gray-700 mb-2">Información Adicional Requerida</h6>
+              {customFieldAnswers.map((f, i) => (
+                <div key={i} className="mb-3">
+                  <label className="text-sm text-gray-700 font-medium">{f.label}</label>
+                  {f.type === 'boolean' ? (
+                    <select
+                      className="border border-gray-300 rounded-md p-1 text-sm w-full mt-1"
+                      value={f.value}
+                      onChange={(e) => {
+                        const updated = [...customFieldAnswers];
+                        updated[i] = { ...updated[i], value: e.target.value };
+                        setCustomFieldAnswers(updated);
+                      }}
+                    >
+                      <option value="">Seleccionar...</option>
+                      <option value="true">Sí</option>
+                      <option value="false">No</option>
+                    </select>
+                  ) : (
+                    <input
+                      type={f.type === 'number' ? 'number' : 'text'}
+                      className="border border-gray-300 rounded-md p-1 text-sm w-full mt-1"
+                      value={f.value}
+                      onChange={(e) => {
+                        const updated = [...customFieldAnswers];
+                        updated[i] = { ...updated[i], value: e.target.value };
+                        setCustomFieldAnswers(updated);
+                      }}
+                    />
+                  )}
+                </div>
+              ))}
+            </div>
+          )}
+
           <div className="pt-3">
             <div className="flex justify-around">
               <button
