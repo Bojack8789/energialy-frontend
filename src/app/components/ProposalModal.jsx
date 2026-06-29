@@ -387,10 +387,10 @@ export function ProposalModal({open, handleOpen, data}) {
         className={`${
           !open
             ? "hidden"
-            : "fixed inset-0 z-50 overflow-auto bg-gray-800 bg-opacity-75 flex items-center justify-center"
+            : "fixed inset-0 z-50 overflow-y-auto bg-gray-800 bg-opacity-75 flex items-start justify-center py-6"
         }`}
       >
-        <div className="mx-auto w-full max-w-[75%]  p-4 bg-slate-50 rounded-md">
+        <div className="mx-auto w-full max-w-[75%] p-4 bg-slate-50 rounded-md my-auto">
           {/* Acceso restringido para colaboradores sin permiso LICITACIONES */}
           {!hasPermission && (
             <div className="flex flex-col items-center justify-center py-10 text-center">
