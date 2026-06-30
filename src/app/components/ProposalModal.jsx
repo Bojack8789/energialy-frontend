@@ -1,654 +1,594 @@
 'use client'
-// import {
-//   Button,
-//   Dialog,
-//   Card,
-//   CardHeader,
-//   CardBody,
-//   CardFooter,
-//   Typography,
-//   Input,
-//   Checkbox,
-// } from "@material-tailwind/react";
 import Select from "react-select";
 import { useState, useEffect } from "react";
 import axios from "axios";
 import { ToastContainer, toast } from "react-toastify";
 import "react-toastify/dist/ReactToastify.css";
 import getLocalStorage from "../Func/localStorage";
-//import UploadthingButton from "./UploadthingButton";
 import { urlProduction } from "../data/dataGeneric";
 import { getAccessToken, getUserId } from "../Func/sessionStorage";
 import LimitExceededModal from "./LimitExceededModal";
 
+const displaySuccessMessage = (msg) =>
+  toast.success(msg, { position: "top-right", autoClose: 2000, theme: "light" });
 
+const displayFailedMessage = (msg) =>
+  toast.error(msg, { position: "top-right", autoClose: 3000, theme: "light" });
 
+const fmt = (n) =>
+  Number(n || 0).toLocaleString("es-AR", { minimumFractionDigits: 2, maximumFractionDigits: 2 });
 
-
-//Toastify module for success message
-const displaySuccessMessage = (mensaje) => {
-  toast.success(mensaje, {
-    position: "top-right",
-    autoClose: 2000,
-    hideProgressBar: false,
-    closeOnClick: true,
-    pauseOnHover: true,
-    draggable: true,
-    progress: undefined,
-    theme: "light",
-  });
+const calculateServiceFeePercentage = (amount) => {
+  if (amount <= 10000) return 2.5;
+  if (amount <= 50000) return 2.25;
+  if (amount <= 100000) return 2;
+  if (amount <= 250000) return 1.75;
+  if (amount <= 500000) return 1.5;
+  if (amount <= 1000000) return 1;
+  return 0.5;
 };
 
-// Toastify module for error messages
-const displayFailedMessage = (mensaje) => {
-  toast.error(mensaje, {
-    position: "top-right",
-    autoClose: 3000,
-    hideProgressBar: false,
-    closeOnClick: true,
-    pauseOnHover: true,
-    draggable: true,
-    progress: undefined,
-    theme: "light",
-  });
-};
+export function ProposalModal({ open, handleOpen, data }) {
+  const userData = getLocalStorage();
 
+  const [hasPermission, setHasPermission] = useState(true);
+  const [projectDuration, setProjectDuration] = useState("");
+  const [description, setDescription] = useState("");
+  const [servicePriceQuotes, setServicePriceQuotes] = useState([]);
+  const [extraItems, setExtraItems] = useState([]);
+  const [customFieldAnswers, setCustomFieldAnswers] = useState([]);
+  const [limitExceededModal, setLimitExceededModal] = useState({ isOpen: false, limitInfo: null });
 
-
-export function ProposalModal({open, handleOpen, data}) {
-
-    const [proposal, setProposal] = useState({
-      totalAmount: 0,
-      projectDuration: "",
-      description: "",
-      tenderId: "",
-      companyId: "",
-      // attachments: [],
-    });
-
-    
-    const userData = getLocalStorage();
-    const accessToken = typeof window !== 'undefined' ? sessionStorage.getItem('accessToken') : null;
-
-    // Control de acceso: colaboradores necesitan permiso LICITACIONES para enviar propuestas
-    const [hasPermission, setHasPermission] = useState(true);
-
-    useEffect(() => {
-      const checkLicitacionesPermission = async () => {
-        if (!userData) return;
-        if (userData.role !== "company_collaborator") return;
-        try {
-          const token = getAccessToken();
-          const userId = getUserId();
-          if (!token || !userId) { setHasPermission(false); return; }
-          const response = await fetch(
-            `${process.env.NEXT_PUBLIC_BASE_URL}/users/${userId}/permissions`,
-            { headers: { Authorization: `Bearer ${token}`, "Content-Type": "application/json" } }
-          );
-          if (response.ok) {
-            const data = await response.json();
-            setHasPermission(Array.isArray(data.permissions) && data.permissions.includes("PROPUESTAS"));
-          } else {
-            setHasPermission(false);
-          }
-        } catch (error) {
-          console.error("Error verificando permisos de propuestas:", error);
+  // Verificar permiso de colaborador
+  useEffect(() => {
+    if (!userData || userData.role !== "company_collaborator") return;
+    const checkPerm = async () => {
+      try {
+        const token = getAccessToken();
+        const userId = getUserId();
+        if (!token || !userId) { setHasPermission(false); return; }
+        const res = await fetch(
+          `${process.env.NEXT_PUBLIC_BASE_URL}/users/${userId}/permissions`,
+          { headers: { Authorization: `Bearer ${token}` } }
+        );
+        if (res.ok) {
+          const d = await res.json();
+          setHasPermission(Array.isArray(d.permissions) && d.permissions.includes("PROPUESTAS"));
+        } else {
           setHasPermission(false);
         }
-      };
-      checkLicitacionesPermission();
-    }, []);
-
-    const [serviceFeePercentage, setServiceFeePercentage] = useState(1);
-    const [serviceAmount, setServiceAmount] = useState(0);
-    const [receiverAmount, setReceiverAmount] = useState(0);
-    const [servicePriceQuotes, setServicePriceQuotes] = useState([]);
-    const [customFieldAnswers, setCustomFieldAnswers] = useState([]);
-    const [limitExceededModal, setLimitExceededModal] = useState({
-      isOpen: false,
-      limitInfo: null,
-    });
-
-
-    // const createProposal = async (proposal) => {
-    //   try {
-    //     const response = await axios.post(
-    //       `${urlProduction}/proposals`,
-    //       proposal
-    //     );
-    //     displaySuccessMessage("Propuesta enviada");
-    //     setProposal({
-    //       totalAmount: 0,
-    //       projectDuration: "",
-    //       description: "",
-    //       tenderId: "",
-    //       companyId: "",
-    //     });
-    //     setTimeout(() => {
-    //       handleOpen()
-    //     }, 2000);
-    //   } catch (error) {
-    //     displayFailedMessage(
-    //       "Error al enviar la propuesta, Por favor complete todos los campos"
-    //     );
-    //   }
-    //   console.log(error);
-    // };
-    const getValidToken = async () => {
-      let token = typeof window !== 'undefined' ? sessionStorage.getItem('accessToken') : null;
-      if (!token) {
-        try {
-          const refreshRes = await axios.get(`${urlProduction}/refresh`, { withCredentials: true });
-          token = refreshRes.data.accessToken;
-          if (token) sessionStorage.setItem('accessToken', token);
-        } catch {
-          return null;
-        }
+      } catch {
+        setHasPermission(false);
       }
-      return token;
     };
+    checkPerm();
+  }, []);
 
-    const createProposal = async (proposal) => {
+  // Inicializar cuando llega data
+  useEffect(() => {
+    if (!data?.id) return;
+    if (data.servicePrices?.length > 0) {
+      setServicePriceQuotes(
+        data.servicePrices.map((s) => ({
+          name: s.name,
+          description: s.description || "",
+          referencePrice: s.price,
+          priceType: s.priceType,
+          quotedPrice: "",
+        }))
+      );
+    }
+    if (data.customFields?.length > 0) {
+      setCustomFieldAnswers(
+        data.customFields.map((f) => ({
+          label: f.label,
+          type: f.type,
+          options: f.options || [],
+          value: "",
+        }))
+      );
+    }
+    setExtraItems([]);
+    setProjectDuration("");
+    setDescription("");
+  }, [data?.id]);
+
+  // Cálculos derivados
+  const serviceSubtotal = servicePriceQuotes.reduce(
+    (sum, s) => sum + (parseFloat(s.quotedPrice) || 0), 0
+  );
+  const extraSubtotal = extraItems.reduce(
+    (sum, e) => sum + (parseFloat(e.price) || 0), 0
+  );
+  const totalAmount = serviceSubtotal + extraSubtotal;
+  const feePercent = calculateServiceFeePercentage(totalAmount);
+  const feeAmount = (totalAmount * feePercent) / 100;
+  const receiverAmount = totalAmount - feeAmount;
+
+  const addExtraItem = () =>
+    setExtraItems([...extraItems, { name: "", price: "" }]);
+
+  const removeExtraItem = (i) =>
+    setExtraItems(extraItems.filter((_, idx) => idx !== i));
+
+  const updateExtraItem = (i, field, value) => {
+    const updated = [...extraItems];
+    updated[i] = { ...updated[i], [field]: value };
+    setExtraItems(updated);
+  };
+
+  const getValidToken = async () => {
+    let token = typeof window !== "undefined" ? sessionStorage.getItem("accessToken") : null;
+    if (!token) {
       try {
-        const token = await getValidToken();
-        if (!token) {
-          displayFailedMessage("Tu sesión expiró. Por favor iniciá sesión nuevamente.");
-          setTimeout(() => { window.location.href = '/'; }, 2000);
-          return;
-        }
-        const response = await axios.post(
-          `${urlProduction}/proposals`,
-          proposal,
-          {
-            headers: {
-              Authorization: `Bearer ${token}`
-            }
-          }
-        );
-        
-        // Verificar el estado de la respuesta
-        if (response.status === 201) {
-          displaySuccessMessage("¡Propuesta enviada exitosamente! Podés verla en 'Mis Propuestas'");
-          console.log('Propuesta creada con ID:', response.data.id);
-
-          // Restablecer el formulario
-          setProposal({
-            totalAmount: 0,
-            projectDuration: "",
-            description: "",
-            tenderId: "",
-            companyId: "",
-          });
-
-          setTimeout(() => {
-            handleOpen();
-            // Refrescar la página para mostrar la nueva propuesta
-            window.location.reload();
-          }, 2500);
-        } else {
-          displayFailedMessage("Algo salió mal, por favor inténtelo de nuevo.");
-        }
-      } catch (error) {
-        console.log(error.response);
-
-        // Token inválido o expirado — limpiar y redirigir al login
-        if ((error.response?.status === 401 || error.response?.status === 403) &&
-            error.response?.data?.error === 'Invalid or expired token') {
-          sessionStorage.removeItem('accessToken');
-          displayFailedMessage("Tu sesión ha expirado. Por favor iniciá sesión nuevamente.");
-          setTimeout(() => { sessionStorage.removeItem('user'); window.location.href = '/'; }, 2000);
-        }
-        // Check for subscription limit errors (403 from middleware)
-        else if (error.response?.status === 403) {
-          const errorData = error.response.data;
-          if (errorData.limitExceeded || errorData.upgradeRequired) {
-            // Show LimitExceededModal
-            setLimitExceededModal({
-              isOpen: true,
-              limitInfo: errorData,
-            });
-            return;
-          }
-        }
-        // Check for subscription limit errors (old 400 format - kept for backwards compatibility)
-        else if (error.response?.status === 400) {
-          const errorMessage = error.response?.data?.error || error.response?.data?.message;
-          if (errorMessage && (errorMessage.includes("subscription") || errorMessage.includes("límite") || errorMessage.includes("plan"))) {
-            // Show upgrade modal with old format
-            const planData = error.response?.data?.data;
-            const limitInfo = {
-              message: errorMessage,
-              detail: planData
-                ? `Actualmente tenés ${planData.activeCount} propuestas activas.`
-                : "Para enviar más propuestas, actualiza tu plan.",
-              currentCount: planData?.activeCount,
-              limit: planData?.limit,
-              planName: planData?.planName,
-              limitExceeded: true,
-              upgradeRequired: true,
-            };
-            setLimitExceededModal({
-              isOpen: true,
-              limitInfo,
-            });
-            return;
-          } else if (errorMessage && errorMessage.includes("own tender")) {
-            displayFailedMessage(
-              "No puedes enviar propuestas a tus propias licitaciones."
-            );
-          } else if (errorMessage && errorMessage.includes("Ya enviaste una propuesta")) {
-            displayFailedMessage(
-              "Ya enviaste una propuesta para esta licitación. Podés verla en 'Mis Propuestas'."
-            );
-            setTimeout(() => {
-              handleOpen();
-            }, 2500);
-          } else {
-            displayFailedMessage(
-              "Error al enviar la propuesta. Por favor complete todos los campos correctamente."
-            );
-          }
-        }
-        else {
-          displayFailedMessage(
-            "Error al enviar la propuesta. Por favor intente nuevamente."
-          );
-        }
+        const r = await axios.get(`${urlProduction}/refresh`, { withCredentials: true });
+        token = r.data.accessToken;
+        if (token) sessionStorage.setItem("accessToken", token);
+      } catch {
+        return null;
       }
+    }
+    return token;
+  };
+
+  const handleSubmit = async (e) => {
+    e.preventDefault();
+
+    if (totalAmount <= 0) {
+      displayFailedMessage("El total de la propuesta debe ser mayor a cero");
+      return;
+    }
+    if (!projectDuration) {
+      displayFailedMessage("Por favor seleccioná la duración del proyecto");
+      return;
+    }
+    if (!description.trim()) {
+      displayFailedMessage("Por favor ingresá una descripción del trabajo");
+      return;
+    }
+    if (!data?.id) {
+      displayFailedMessage("Error: ID de licitación no disponible");
+      return;
+    }
+    if (!userData?.company?.id) {
+      displayFailedMessage("Error: ID de empresa no disponible. Recargá la página.");
+      return;
+    }
+
+    const allQuotes = [
+      ...servicePriceQuotes.map((s) => ({
+        name: s.name,
+        description: s.description,
+        referencePrice: s.referencePrice,
+        priceType: s.priceType,
+        quotedPrice: parseFloat(s.quotedPrice) || 0,
+        isExtra: false,
+      })),
+      ...extraItems.map((e) => ({
+        name: e.name,
+        description: "",
+        referencePrice: null,
+        priceType: "fixed",
+        quotedPrice: parseFloat(e.price) || 0,
+        isExtra: true,
+      })),
+    ];
+
+    const payload = {
+      totalAmount,
+      projectDuration,
+      description,
+      tenderId: data.id,
+      companyId: userData.company.id,
+      servicePriceQuotes: allQuotes,
+      customFieldAnswers,
     };
-    const calculateFee = (totalAmount, serviceFeePercentage) => {
-      if (
-        typeof serviceFeePercentage !== "number" ||
-        serviceFeePercentage < 0 ||
-        serviceFeePercentage > 100
-      ) {
-        throw new Error(
-          "Service fee percentage must be a number between 0 and 100."
-        );
-      }
-      const serviceAmount = (totalAmount * serviceFeePercentage) / 100;
-      const receiverAmount = totalAmount - serviceAmount;
-      
-      setServiceAmount(serviceAmount);
-      setReceiverAmount(receiverAmount);
-      return { serviceAmount, receiverAmount };
-    
-    };
-    // const validations = (proposalCompanyId, tenderCompanyId) => {
-    //   if(proposalCompanyId === tenderCompanyId) {
-    //     displayFailedMessage(
-    //       "No puede presentar propuestas a su propia Empresa"
-    //     );
-    //   }else{
-    //     return 
-    //   }
 
-    // }
-
-    // const handleSave = async (e) => {
-    //   console.log(e)
-    //   setProposal(...proposal, { proposalState: "save" });
-    //   console.log(proposal);
-    // }
-
-    const handleInput = (e) => {
-      const { name, value } = e.target;
-      if (name === "totalAmount") {
-        const numericValue = parseFloat(value) || 0;
-        calculateFee(numericValue, serviceFeePercentage);
-        setProposal({ ...proposal, [name]: numericValue });
+    try {
+      const token = await getValidToken();
+      if (!token) {
+        displayFailedMessage("Tu sesión expiró. Por favor iniciá sesión nuevamente.");
+        setTimeout(() => { window.location.href = "/"; }, 2000);
         return;
       }
-      setProposal({ ...proposal, [name]: value });
+      const response = await axios.post(`${urlProduction}/proposals`, payload, {
+        headers: { Authorization: `Bearer ${token}` },
+      });
+
+      if (response.status === 201) {
+        displaySuccessMessage("¡Propuesta enviada exitosamente!");
+        setTimeout(() => {
+          handleOpen();
+          window.location.reload();
+        }, 2500);
+      } else {
+        displayFailedMessage("Algo salió mal, por favor intentá nuevamente.");
+      }
+    } catch (error) {
+      if (
+        (error.response?.status === 401 || error.response?.status === 403) &&
+        error.response?.data?.error === "Invalid or expired token"
+      ) {
+        sessionStorage.removeItem("accessToken");
+        displayFailedMessage("Tu sesión expiró. Por favor iniciá sesión nuevamente.");
+        setTimeout(() => { sessionStorage.removeItem("user"); window.location.href = "/"; }, 2000);
+      } else if (error.response?.status === 403) {
+        const d = error.response.data;
+        if (d.limitExceeded || d.upgradeRequired) {
+          setLimitExceededModal({ isOpen: true, limitInfo: d });
+        }
+      } else if (error.response?.status === 400) {
+        const msg = error.response?.data?.error || error.response?.data?.message || "";
+        if (msg.includes("subscription") || msg.includes("límite") || msg.includes("plan")) {
+          const pd = error.response?.data?.data;
+          setLimitExceededModal({
+            isOpen: true,
+            limitInfo: {
+              message: msg,
+              detail: pd ? `Tenés ${pd.activeCount} propuestas activas.` : "Actualizá tu plan.",
+              currentCount: pd?.activeCount,
+              limit: pd?.limit,
+              planName: pd?.planName,
+              limitExceeded: true,
+              upgradeRequired: true,
+            },
+          });
+        } else if (msg.includes("own tender")) {
+          displayFailedMessage("No podés enviar propuestas a tus propias licitaciones.");
+        } else if (msg.includes("Ya enviaste")) {
+          displayFailedMessage("Ya enviaste una propuesta para esta licitación.");
+          setTimeout(handleOpen, 2500);
+        } else {
+          displayFailedMessage("Error al enviar la propuesta. Completá todos los campos.");
+        }
+      } else {
+        displayFailedMessage("Error al enviar la propuesta. Intentá nuevamente.");
+      }
     }
+  };
 
-    const handleSubmit = async (e) => {
-
-        e.preventDefault();
-
-        // Validar que todos los campos requeridos estén presentes
-        if (!proposal.totalAmount || proposal.totalAmount <= 0) {
-          displayFailedMessage("Por favor ingresa un monto válido para la propuesta");
-          return;
-        }
-        if (!proposal.projectDuration) {
-          displayFailedMessage("Por favor selecciona la duración del proyecto");
-          return;
-        }
-        if (!proposal.description || proposal.description.trim() === "") {
-          displayFailedMessage("Por favor ingresa una descripción del trabajo");
-          return;
-        }
-        if (!proposal.tenderId) {
-          displayFailedMessage("Error: ID de licitación no disponible");
-          return;
-        }
-        if (!proposal.companyId) {
-          displayFailedMessage("Error: ID de empresa no disponible. Por favor recarga la página.");
-          return;
-        }
-
-        const fullProposal = {
-          ...proposal,
-          servicePriceQuotes: servicePriceQuotes.map((s) => ({
-            ...s,
-            quotedPrice: parseFloat(s.quotedPrice) || 0,
-          })),
-          customFieldAnswers,
-        };
-        createProposal(fullProposal);
-    }
-  
-    const optionDuration = [
-        "Menos de una semana",
-        "Menos de un mes",
-        "De 1 a 3 meses",
-        "De 3 a 6 meses",
-        "Más de 6 meses",
-      ];
-      
-      useEffect(() => {
-        if (data?.id && userData?.company?.id) {
-          setProposal((prev) => ({
-            ...prev,
-            tenderId: data.id,
-            companyId: userData.company.id,
-          }));
-        }
-        if (data?.servicePrices?.length > 0) {
-          setServicePriceQuotes(
-            data.servicePrices.map((s) => ({
-              name: s.name,
-              referencePrice: s.price,
-              priceType: s.priceType,
-              quotedPrice: "",
-            }))
-          );
-        }
-        if (data?.customFields?.length > 0) {
-          setCustomFieldAnswers(
-            data.customFields.map((f) => ({
-              label: f.label,
-              type: f.type,
-              options: f.options || [],
-              value: "",
-            }))
-          );
-        }
-      }, [data?.id, userData?.company?.id])
+  const optionDuration = [
+    "Menos de una semana",
+    "Menos de un mes",
+    "De 1 a 3 meses",
+    "De 3 a 6 meses",
+    "Más de 6 meses",
+  ];
 
   if (!data) return null;
 
   return (
     <>
       <div
-        open={open}
-        handler={handleOpen}
-        className={`${
+        className={
           !open
             ? "hidden"
             : "fixed inset-0 z-50 overflow-y-auto bg-gray-800 bg-opacity-75 flex items-start justify-center py-6"
-        }`}
+        }
       >
-        <div className="mx-auto w-full max-w-[75%] p-4 bg-slate-50 rounded-md my-auto">
-          {/* Acceso restringido para colaboradores sin permiso LICITACIONES */}
-          {!hasPermission && (
-            <div className="flex flex-col items-center justify-center py-10 text-center">
+        <div className="mx-auto w-full max-w-3xl bg-white rounded-lg shadow-xl my-auto">
+
+          {/* Acceso restringido */}
+          {!hasPermission ? (
+            <div className="flex flex-col items-center justify-center py-10 text-center p-6">
               <svg xmlns="http://www.w3.org/2000/svg" className="h-14 w-14 text-red-500 mb-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
                 <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 15v2m-6 4h12a2 2 0 002-2v-6a2 2 0 00-2-2H6a2 2 0 00-2 2v6a2 2 0 002 2zm10-10V7a4 4 0 00-8 0v4h8z" />
               </svg>
               <h3 className="text-xl font-bold text-gray-800 mb-2">Acceso Restringido</h3>
-              <p className="text-gray-600 mb-1">No tienes permiso para enviar propuestas.</p>
-              <p className="text-gray-500 text-sm mb-6">Contacta a tu empleador para solicitar el permiso de <strong>Licitaciones</strong>.</p>
-              <button
-                className="bg-secondary-500 px-4 py-2 rounded-md text-white font-bold"
-                onClick={handleOpen}
-              >
-                Cerrar
-              </button>
+              <p className="text-gray-600 mb-1">No tenés permiso para enviar propuestas.</p>
+              <p className="text-gray-500 text-sm mb-6">Contactá a tu empleador para solicitar el permiso de <strong>Propuestas</strong>.</p>
+              <button className="bg-gray-600 px-4 py-2 rounded-md text-white font-bold" onClick={handleOpen}>Cerrar</button>
             </div>
-          )}
-          {hasPermission && (
-          <>
-          <div className="flex flex-col gap-2 md:flex-row ">
-            <div className="md:min-w-[75%]">
-              <h4 className="mb-4 text-xl">{data.company?.name}</h4>
-              <h5 className="mb-4 text-lg">{data.title}</h5>
-              <p className="mb-4 text-base">
-                Duración del proyecto: {data.projectDuration}
-              </p>
-              <p className="mb-1 text-sm">
-                Completa todos los campos para presentar tu propuesta. <br />
-                <span className="text-red-500 text-xs font-bold">
-                  Una vez enviada, no podrá ser modificada
-                </span>
-              </p>
-            </div>
-            <div className="flex flex-col gap-4">
-              <span class="inline-block whitespace-nowrap rounded-[0.27rem] bg-slate-300 px-[0.65em] pb-[0.25em] pt-[0.35em] text-center align-baseline text-[0.75em] font-bold leading-none text-info-800">
-                USD: {data.budget}
-              </span>
-              {data.location && (
-                <span
-                  class={`${
-                    data.location.id === "e8bbe98e-a725-44bb-b7d8-990013794f5c"
-                      ? "bg-secondary-200 text-secondary-800"
-                      : data.location.id ===
-                        "9a83f3bb-0472-4e7e-bb67-9c8bdf996cd3"
-                      ? "bg-danger-500 text-danger-700"
-                      : "bg-info-800 text-info-700"
-                  } inline-block whitespace-nowrap rounded-[0.27rem]  px-[0.65em] pb-[0.25em] pt-[0.35em] text-center align-baseline text-[0.75em] font-bold leading-none `}
-                >
-                  {data.location?.name}
-                </span>
-              )}
-              {!data.location && data.address && (
-                <span class="inline-block whitespace-nowrap rounded-[0.27rem] bg-info-800 text-info-700 px-[0.65em] pb-[0.25em] pt-[0.35em] text-center align-baseline text-[0.75em] font-bold leading-none">
-                  {data.address}
-                </span>
-              )}
-              <span class="inline-block whitespace-nowrap rounded-[0.27rem] bg-teal-200 px-[0.65em] pb-[0.25em] pt-[0.35em] text-center align-baseline text-[0.75em] font-bold leading-none text-teal-800">
-                {data.majorSector}
-              </span>
-            </div>
-          </div>
-          <div className="flex flex-col gap-3">
-            <div>
-              <label htmlFor="">Ingrese el monto de su propuesta:</label>
-              <input
-                type="number"
-                placeholder="USD"
-                name="totalAmount"
-                value={proposal.totalAmount || ""}
-                className="border-1 mt-1 w-full p-2 rounded-md"
-                onChange={handleInput}
-              />
-              <div className="mt-2 flex justify-start gap-5 ml-2">
-                <div className="text-xs">
-                  <span className="font-bold">(USD) {serviceAmount}</span>{" "}
-                  {"  "}
-                  <span className="font-bold text-secondary-600">
-                    &quot;Energialy&quot;
-                  </span>
-                  ServiceFee ( Fee: entre 2,5% y 0.5%)
+          ) : (
+            <>
+              {/* Header */}
+              <div className="px-6 py-4 border-b border-gray-200 flex items-start justify-between">
+                <div>
+                  <p className="text-xs text-gray-500 uppercase tracking-wide mb-1">{data.company?.name}</p>
+                  <h2 className="text-lg font-bold text-gray-900">{data.title}</h2>
+                  <div className="flex flex-wrap gap-2 mt-2">
+                    {data.budget && (
+                      <span className="px-2 py-0.5 bg-gray-100 text-gray-700 text-xs rounded-full font-medium">
+                        Presupuesto: USD {Number(data.budget).toLocaleString()}
+                      </span>
+                    )}
+                    {data.location && (
+                      <span className="px-2 py-0.5 bg-blue-50 text-blue-700 text-xs rounded-full font-medium">
+                        {data.location.name}
+                      </span>
+                    )}
+                    {data.majorSector && (
+                      <span className="px-2 py-0.5 bg-teal-50 text-teal-700 text-xs rounded-full font-medium">
+                        {data.majorSector}
+                      </span>
+                    )}
+                  </div>
                 </div>
-                <div className="text-xs">
-                  <span className="font-bold">(USD) {receiverAmount}</span>{" "}
-                  Ingresos que recibirás si tu Propuesta es elegida{" "}
-                </div>
+                <button onClick={handleOpen} className="text-gray-400 hover:text-gray-600 ml-4 flex-shrink-0">
+                  <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M6 18L18 6M6 6l12 12" />
+                  </svg>
+                </button>
               </div>
-            </div>
-            <label htmlFor="">Duración:</label>
-            <Select
-              placeholder="TIEMPO DE EJECUCIÓN DE LA LICITACION"
-              options={optionDuration?.map((duration) => ({
-                value: duration,
-                label: duration,
-              }))}
-              onChange={(e) =>
-                setProposal({ ...proposal, projectDuration: e.value })
-              }
-            />
-            <div className="flex flex-col gap-3">
-              <label htmlFor="">Descripción del Trabajo</label>
-              <textarea
-                name="description"
-                placeholder="Mensaje a la empresa que contratará tus servicios. Indicá de forma detallada el trabajo que realizarás en esta licitación"
-                id="description"
-                rows={10}
-                cols={70}
-                className="border-2 border-gray-300 rounded-md p-2"
-                onChange={handleInput}
-              ></textarea>
-              {/* <UploadthingButton/> */}
-            </div>
-          </div>
-          {/* Cotización de servicios */}
-          {servicePriceQuotes.length > 0 && (
-            <div className="mt-4">
-              <h6 className="font-semibold text-gray-700 mb-2">Cotización de Servicios</h6>
-              <div className="grid grid-cols-4 gap-2 text-xs font-medium text-gray-500 mb-1 px-1">
-                <span>Servicio</span>
-                <span>Descripción</span>
-                <span>Precio referencia</span>
-                <span>Tu precio (USD)</span>
-              </div>
-              {servicePriceQuotes.map((s, i) => (
-                <div key={i} className="grid grid-cols-4 gap-2 items-center mb-2">
-                  <span className="text-sm font-medium">{s.name}</span>
-                  <span className="text-xs text-gray-500">{data.servicePrices[i]?.description}</span>
-                  <span className="text-sm text-gray-600">USD {s.referencePrice} / {s.priceType === 'per_day' ? 'día' : 'fijo'}</span>
-                  <input
-                    type="number"
-                    placeholder="USD"
-                    className="border border-gray-300 rounded-md p-1 text-sm"
-                    value={s.quotedPrice}
-                    onChange={(e) => {
-                      const updated = [...servicePriceQuotes];
-                      updated[i] = { ...updated[i], quotedPrice: e.target.value };
-                      setServicePriceQuotes(updated);
-                    }}
-                  />
-                </div>
-              ))}
-            </div>
-          )}
 
-          {/* Campos personalizados */}
-          {customFieldAnswers.length > 0 && (
-            <div className="mt-4">
-              <h6 className="font-semibold text-gray-700 mb-2">Información Adicional Requerida</h6>
-              {customFieldAnswers.map((f, i) => (
-                <div key={i} className="mb-3">
-                  <label className="text-sm text-gray-700 font-medium">{f.label}</label>
-                  {f.type === 'boolean' ? (
-                    <select
-                      className="border border-gray-300 rounded-md p-1 text-sm w-full mt-1"
-                      value={f.value}
-                      onChange={(e) => {
-                        const updated = [...customFieldAnswers];
-                        updated[i] = { ...updated[i], value: e.target.value };
-                        setCustomFieldAnswers(updated);
-                      }}
-                    >
-                      <option value="">Seleccionar...</option>
-                      <option value="true">Sí</option>
-                      <option value="false">No</option>
-                    </select>
-                  ) : f.type === 'select' ? (
-                    <select
-                      className="border border-gray-300 rounded-md p-1 text-sm w-full mt-1"
-                      value={f.value}
-                      onChange={(e) => {
-                        const updated = [...customFieldAnswers];
-                        updated[i] = { ...updated[i], value: e.target.value };
-                        setCustomFieldAnswers(updated);
-                      }}
-                    >
-                      <option value="">Seleccionar...</option>
-                      {(f.options || []).map((opt, oi) => (
-                        <option key={oi} value={opt}>{opt}</option>
-                      ))}
-                    </select>
-                  ) : f.type === 'radio' ? (
-                    <div className="flex flex-col gap-1 mt-1">
-                      {(f.options || []).map((opt, oi) => (
-                        <label key={oi} className="flex items-center gap-2 text-sm cursor-pointer">
-                          <input
-                            type="radio"
-                            name={`radio_field_${i}`}
-                            value={opt}
-                            checked={f.value === opt}
-                            onChange={() => {
-                              const updated = [...customFieldAnswers];
-                              updated[i] = { ...updated[i], value: opt };
-                              setCustomFieldAnswers(updated);
-                            }}
-                            className="accent-primary-600"
-                          />
-                          {opt}
-                        </label>
+              <div className="p-6 space-y-6">
+
+                {/* ── TABLA DE PRESUPUESTO ── */}
+                <div>
+                  <h3 className="text-sm font-semibold text-gray-700 uppercase tracking-wide mb-3">
+                    Detalle de la Propuesta
+                  </h3>
+
+                  <div className="border border-gray-200 rounded-lg overflow-hidden">
+                    {/* Encabezado tabla */}
+                    <div className="grid grid-cols-12 gap-2 bg-gray-50 px-4 py-2 text-xs font-semibold text-gray-500 uppercase tracking-wide border-b border-gray-200">
+                      <span className="col-span-5">Servicio / Ítem</span>
+                      <span className="col-span-3">Descripción</span>
+                      <span className="col-span-2 text-right">Ref. (USD)</span>
+                      <span className="col-span-2 text-right">Tu precio (USD)</span>
+                    </div>
+
+                    {/* Servicios de la licitación */}
+                    {servicePriceQuotes.length > 0 && (
+                      <div className="divide-y divide-gray-100">
+                        {servicePriceQuotes.map((s, i) => (
+                          <div key={i} className="grid grid-cols-12 gap-2 px-4 py-3 items-center">
+                            <div className="col-span-5">
+                              <span className="text-sm font-medium text-gray-800">{s.name}</span>
+                              <span className="ml-2 text-xs text-gray-400">
+                                ({s.priceType === "per_day" ? "por día" : "fijo"})
+                              </span>
+                            </div>
+                            <div className="col-span-3 text-xs text-gray-500">{s.description}</div>
+                            <div className="col-span-2 text-right text-sm text-gray-500">
+                              {s.referencePrice ? fmt(s.referencePrice) : "—"}
+                            </div>
+                            <div className="col-span-2">
+                              <input
+                                type="number"
+                                min="0"
+                                placeholder="0.00"
+                                value={s.quotedPrice}
+                                onChange={(e) => {
+                                  const updated = [...servicePriceQuotes];
+                                  updated[i] = { ...updated[i], quotedPrice: e.target.value };
+                                  setServicePriceQuotes(updated);
+                                }}
+                                className="w-full text-right border border-gray-300 rounded px-2 py-1 text-sm focus:outline-none focus:ring-1 focus:ring-blue-500"
+                              />
+                            </div>
+                          </div>
+                        ))}
+                      </div>
+                    )}
+
+                    {/* Ítems extra del proveedor */}
+                    {extraItems.length > 0 && (
+                      <div className="divide-y divide-gray-100 border-t border-dashed border-gray-300">
+                        {extraItems.map((item, i) => (
+                          <div key={i} className="grid grid-cols-12 gap-2 px-4 py-3 items-center bg-blue-50/40">
+                            <div className="col-span-5">
+                              <input
+                                type="text"
+                                placeholder="Nombre del ítem"
+                                value={item.name}
+                                onChange={(e) => updateExtraItem(i, "name", e.target.value)}
+                                className="w-full border border-gray-300 rounded px-2 py-1 text-sm focus:outline-none focus:ring-1 focus:ring-blue-500"
+                              />
+                            </div>
+                            <div className="col-span-3 text-xs text-blue-600 font-medium flex items-center gap-1">
+                              <svg className="w-3 h-3" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 4v16m8-8H4" />
+                              </svg>
+                              Agregado por vos
+                            </div>
+                            <div className="col-span-2 text-right text-xs text-gray-400">—</div>
+                            <div className="col-span-2 flex gap-1 items-center">
+                              <input
+                                type="number"
+                                min="0"
+                                placeholder="0.00"
+                                value={item.price}
+                                onChange={(e) => updateExtraItem(i, "price", e.target.value)}
+                                className="w-full text-right border border-gray-300 rounded px-2 py-1 text-sm focus:outline-none focus:ring-1 focus:ring-blue-500"
+                              />
+                              <button
+                                onClick={() => removeExtraItem(i)}
+                                className="text-red-400 hover:text-red-600 flex-shrink-0"
+                                title="Eliminar"
+                              >
+                                <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M6 18L18 6M6 6l12 12" />
+                                </svg>
+                              </button>
+                            </div>
+                          </div>
+                        ))}
+                      </div>
+                    )}
+
+                    {/* Botón agregar ítem */}
+                    <div className="px-4 py-2 border-t border-dashed border-gray-200">
+                      <button
+                        onClick={addExtraItem}
+                        className="flex items-center gap-1 text-sm text-blue-600 hover:text-blue-800 font-medium transition-colors"
+                      >
+                        <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                          <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 4v16m8-8H4" />
+                        </svg>
+                        Agregar ítem
+                      </button>
+                    </div>
+
+                    {/* Totales */}
+                    <div className="border-t border-gray-200 bg-gray-50 px-4 py-3 space-y-1">
+                      {extraItems.length > 0 && (
+                        <>
+                          <div className="flex justify-between text-xs text-gray-500">
+                            <span>Subtotal servicios</span>
+                            <span>USD {fmt(serviceSubtotal)}</span>
+                          </div>
+                          <div className="flex justify-between text-xs text-gray-500">
+                            <span>Subtotal ítems propios</span>
+                            <span>USD {fmt(extraSubtotal)}</span>
+                          </div>
+                        </>
+                      )}
+                      <div className="flex justify-between text-sm font-semibold text-gray-800 pt-1 border-t border-gray-200">
+                        <span>Total propuesta</span>
+                        <span>USD {fmt(totalAmount)}</span>
+                      </div>
+                      <div className="flex justify-between text-xs text-orange-600">
+                        <span>Fee Energialy ({feePercent}%)</span>
+                        <span>− USD {fmt(feeAmount)}</span>
+                      </div>
+                      <div className="flex justify-between text-sm font-bold text-green-700 pt-1 border-t border-gray-200">
+                        <span>Ingresos que recibís</span>
+                        <span>USD {fmt(receiverAmount)}</span>
+                      </div>
+                    </div>
+                  </div>
+                </div>
+
+                {/* ── DURACIÓN Y DESCRIPCIÓN ── */}
+                <div className="grid grid-cols-1 gap-4">
+                  <div>
+                    <label className="block text-sm font-medium text-gray-700 mb-1">Duración del trabajo</label>
+                    <Select
+                      placeholder="Seleccioná la duración..."
+                      options={optionDuration.map((d) => ({ value: d, label: d }))}
+                      onChange={(e) => setProjectDuration(e.value)}
+                    />
+                  </div>
+                  <div>
+                    <label className="block text-sm font-medium text-gray-700 mb-1">Descripción del trabajo</label>
+                    <textarea
+                      rows={4}
+                      placeholder="Describí de forma detallada el trabajo que realizarás en esta licitación..."
+                      value={description}
+                      onChange={(e) => setDescription(e.target.value)}
+                      className="w-full border border-gray-300 rounded-lg p-3 text-sm focus:outline-none focus:ring-2 focus:ring-blue-500"
+                    />
+                  </div>
+                </div>
+
+                {/* ── CAMPOS PERSONALIZADOS ── */}
+                {customFieldAnswers.length > 0 && (
+                  <div>
+                    <h3 className="text-sm font-semibold text-gray-700 uppercase tracking-wide mb-3">
+                      Información Adicional Requerida
+                    </h3>
+                    <div className="space-y-3">
+                      {customFieldAnswers.map((f, i) => (
+                        <div key={i}>
+                          <label className="block text-sm text-gray-700 font-medium mb-1">{f.label}</label>
+                          {f.type === "boolean" ? (
+                            <select
+                              className="border border-gray-300 rounded-md p-2 text-sm w-full"
+                              value={f.value}
+                              onChange={(e) => {
+                                const u = [...customFieldAnswers];
+                                u[i] = { ...u[i], value: e.target.value };
+                                setCustomFieldAnswers(u);
+                              }}
+                            >
+                              <option value="">Seleccionar...</option>
+                              <option value="true">Sí</option>
+                              <option value="false">No</option>
+                            </select>
+                          ) : f.type === "select" ? (
+                            <select
+                              className="border border-gray-300 rounded-md p-2 text-sm w-full"
+                              value={f.value}
+                              onChange={(e) => {
+                                const u = [...customFieldAnswers];
+                                u[i] = { ...u[i], value: e.target.value };
+                                setCustomFieldAnswers(u);
+                              }}
+                            >
+                              <option value="">Seleccionar...</option>
+                              {(f.options || []).map((opt, oi) => (
+                                <option key={oi} value={opt}>{opt}</option>
+                              ))}
+                            </select>
+                          ) : f.type === "radio" ? (
+                            <div className="flex flex-col gap-1">
+                              {(f.options || []).map((opt, oi) => (
+                                <label key={oi} className="flex items-center gap-2 text-sm cursor-pointer">
+                                  <input
+                                    type="radio"
+                                    name={`radio_${i}`}
+                                    value={opt}
+                                    checked={f.value === opt}
+                                    onChange={() => {
+                                      const u = [...customFieldAnswers];
+                                      u[i] = { ...u[i], value: opt };
+                                      setCustomFieldAnswers(u);
+                                    }}
+                                    className="accent-blue-600"
+                                  />
+                                  {opt}
+                                </label>
+                              ))}
+                            </div>
+                          ) : f.type === "textarea" ? (
+                            <textarea
+                              rows={3}
+                              className="border border-gray-300 rounded-md p-2 text-sm w-full"
+                              value={f.value}
+                              onChange={(e) => {
+                                const u = [...customFieldAnswers];
+                                u[i] = { ...u[i], value: e.target.value };
+                                setCustomFieldAnswers(u);
+                              }}
+                            />
+                          ) : (
+                            <input
+                              type={f.type === "number" ? "number" : f.type === "date" ? "date" : "text"}
+                              className="border border-gray-300 rounded-md p-2 text-sm w-full"
+                              value={f.value}
+                              onChange={(e) => {
+                                const u = [...customFieldAnswers];
+                                u[i] = { ...u[i], value: e.target.value };
+                                setCustomFieldAnswers(u);
+                              }}
+                            />
+                          )}
+                        </div>
                       ))}
                     </div>
-                  ) : f.type === 'textarea' ? (
-                    <textarea
-                      rows={3}
-                      className="border border-gray-300 rounded-md p-1 text-sm w-full mt-1"
-                      value={f.value}
-                      onChange={(e) => {
-                        const updated = [...customFieldAnswers];
-                        updated[i] = { ...updated[i], value: e.target.value };
-                        setCustomFieldAnswers(updated);
-                      }}
-                    />
-                  ) : (
-                    <input
-                      type={f.type === 'number' ? 'number' : f.type === 'date' ? 'date' : 'text'}
-                      className="border border-gray-300 rounded-md p-1 text-sm w-full mt-1"
-                      value={f.value}
-                      onChange={(e) => {
-                        const updated = [...customFieldAnswers];
-                        updated[i] = { ...updated[i], value: e.target.value };
-                        setCustomFieldAnswers(updated);
-                      }}
-                    />
-                  )}
-                </div>
-              ))}
-            </div>
-          )}
+                  </div>
+                )}
 
-          <div className="pt-3">
-            <div className="flex justify-around">
-              <button
-                className="bg-primary-600 px-4 py-2 rounded-md text-white font-bold"
-                onClick={handleSubmit}
-              >
-                Enviar
-              </button>
-              {/* <button className="bg-green-600" onClick={handleSave}>
-                Guardar
-              </button> */}
-              <button
-                className="bg-secondary-500 px-4 py-2 rounded-md text-white font-bold"
-                onClick={handleOpen}
-              >
-                Cancelar
-              </button>
-            </div>
-          </div>
-          </>
-          )} {/* fin bloque hasPermission */}
+                {/* ── AVISO + BOTONES ── */}
+                <p className="text-xs text-red-500 font-medium">
+                  Una vez enviada, la propuesta no puede modificarse.
+                </p>
+                <div className="flex gap-3 pt-1">
+                  <button
+                    onClick={handleSubmit}
+                    disabled={totalAmount <= 0}
+                    className="flex-1 bg-[#191654] hover:bg-[#252075] disabled:opacity-50 text-white font-semibold py-2.5 rounded-lg transition-colors"
+                  >
+                    Enviar Propuesta
+                  </button>
+                  <button
+                    onClick={handleOpen}
+                    className="flex-1 border-2 border-gray-300 text-gray-700 hover:bg-gray-50 font-semibold py-2.5 rounded-lg transition-colors"
+                  >
+                    Cancelar
+                  </button>
+                </div>
+              </div>
+            </>
+          )}
         </div>
         <ToastContainer style={{ marginTop: "100px" }} />
       </div>
 
-      {/* Limit Exceeded Modal */}
       <LimitExceededModal
         isOpen={limitExceededModal.isOpen}
-        onClose={() =>
-          setLimitExceededModal({ isOpen: false, limitInfo: null })
-        }
+        onClose={() => setLimitExceededModal({ isOpen: false, limitInfo: null })}
         limitInfo={limitExceededModal.limitInfo}
       />
     </>

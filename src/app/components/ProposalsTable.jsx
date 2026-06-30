@@ -2,12 +2,125 @@
 import { useState } from "react";
 import { useUpdateProposalStatusMutation } from "../redux/services/ProposalApi";
 
+const fmt = (n) =>
+  Number(n || 0).toLocaleString("es-AR", { minimumFractionDigits: 2, maximumFractionDigits: 2 });
+
+const ProposalDetailPanel = ({ proposal }) => {
+  const quotes = proposal.servicePriceQuotes || [];
+  const answers = proposal.customFieldAnswers || [];
+  if (quotes.length === 0 && answers.length === 0) {
+    return (
+      <div className="px-6 py-3 text-sm text-gray-400 italic">
+        Sin detalle de ítems cotizados.
+      </div>
+    );
+  }
+  const baseItems = quotes.filter((q) => !q.isExtra);
+  const extraItems = quotes.filter((q) => q.isExtra);
+  return (
+    <div className="px-6 py-4 bg-gray-50 border-t border-gray-100 space-y-4">
+      {quotes.length > 0 && (
+        <div>
+          <h4 className="text-xs font-semibold text-gray-500 uppercase tracking-wide mb-2">
+            Detalle de cotización
+          </h4>
+          <div className="border border-gray-200 rounded-lg overflow-hidden">
+            <table className="w-full text-sm">
+              <thead className="bg-gray-100">
+                <tr>
+                  <th className="px-4 py-2 text-left text-xs text-gray-500 font-semibold">Ítem</th>
+                  <th className="px-4 py-2 text-left text-xs text-gray-500 font-semibold">Tipo</th>
+                  <th className="px-4 py-2 text-right text-xs text-gray-500 font-semibold">Ref. (USD)</th>
+                  <th className="px-4 py-2 text-right text-xs text-gray-500 font-semibold">Cotizado (USD)</th>
+                </tr>
+              </thead>
+              <tbody className="divide-y divide-gray-100 bg-white">
+                {baseItems.map((q, i) => (
+                  <tr key={i}>
+                    <td className="px-4 py-2 font-medium text-gray-800">{q.name}</td>
+                    <td className="px-4 py-2 text-gray-500 text-xs">
+                      {q.priceType === "per_day" ? "Por día" : "Fijo"}
+                    </td>
+                    <td className="px-4 py-2 text-right text-gray-500">
+                      {q.referencePrice != null ? fmt(q.referencePrice) : "—"}
+                    </td>
+                    <td className="px-4 py-2 text-right font-semibold text-gray-900">
+                      {fmt(q.quotedPrice)}
+                    </td>
+                  </tr>
+                ))}
+                {extraItems.map((q, i) => (
+                  <tr key={`extra-${i}`} className="bg-blue-50/50">
+                    <td className="px-4 py-2 font-medium text-blue-800">
+                      {q.name}
+                      <span className="ml-1 text-xs text-blue-500">(extra)</span>
+                    </td>
+                    <td className="px-4 py-2 text-xs text-gray-400">Fijo</td>
+                    <td className="px-4 py-2 text-right text-gray-400">—</td>
+                    <td className="px-4 py-2 text-right font-semibold text-blue-700">
+                      {fmt(q.quotedPrice)}
+                    </td>
+                  </tr>
+                ))}
+              </tbody>
+              <tfoot className="border-t border-gray-200 bg-gray-50">
+                <tr>
+                  <td colSpan={3} className="px-4 py-2 text-right text-sm font-semibold text-gray-700">
+                    Total propuesto
+                  </td>
+                  <td className="px-4 py-2 text-right text-sm font-bold text-gray-900">
+                    USD {fmt(proposal.totalAmount)}
+                  </td>
+                </tr>
+                <tr>
+                  <td colSpan={3} className="px-4 py-1 text-right text-xs text-orange-600">
+                    Fee Energialy ({proposal.serviceFee}%)
+                  </td>
+                  <td className="px-4 py-1 text-right text-xs text-orange-600">
+                    − USD {fmt(proposal.serviceAmount)}
+                  </td>
+                </tr>
+                <tr>
+                  <td colSpan={3} className="px-4 py-2 text-right text-sm font-semibold text-green-700">
+                    A recibir
+                  </td>
+                  <td className="px-4 py-2 text-right text-sm font-bold text-green-700">
+                    USD {fmt(proposal.receiverAmount)}
+                  </td>
+                </tr>
+              </tfoot>
+            </table>
+          </div>
+        </div>
+      )}
+      {answers.length > 0 && (
+        <div>
+          <h4 className="text-xs font-semibold text-gray-500 uppercase tracking-wide mb-2">
+            Información adicional
+          </h4>
+          <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
+            {answers.map((a, i) => (
+              <div key={i} className="bg-white border border-gray-200 rounded-lg px-3 py-2">
+                <p className="text-xs text-gray-500 mb-0.5">{a.label}</p>
+                <p className="text-sm font-medium text-gray-800">
+                  {a.value === "true" ? "Sí" : a.value === "false" ? "No" : a.value || <span className="text-gray-400 italic">Sin respuesta</span>}
+                </p>
+              </div>
+            ))}
+          </div>
+        </div>
+      )}
+    </div>
+  );
+};
+
 const ProposalsTable = ({ proposals, tenderInfo, onRefresh }) => {
   const [filterStatus, setFilterStatus] = useState("all");
   const [updateProposalStatus, { isLoading }] = useUpdateProposalStatusMutation();
   const [selectedProposal, setSelectedProposal] = useState(null);
   const [showConfirmModal, setShowConfirmModal] = useState(false);
   const [actionType, setActionType] = useState("");
+  const [expandedId, setExpandedId] = useState(null);
 
   // Filtrar propuestas por estado
   const filteredProposals = proposals?.filter((proposal) => {
@@ -200,10 +313,11 @@ const ProposalsTable = ({ proposals, tenderInfo, onRefresh }) => {
                     No hay propuestas para mostrar
                   </td>
                 </tr>
-              ) : (
-                sortedProposals.map((proposal, index) => (
+              ) : null}
+            </tbody>
+            {sortedProposals.length > 0 && sortedProposals.map((proposal) => (
+                  <tbody key={proposal.id}>
                   <tr
-                    key={proposal.id}
                     className={`hover:bg-gray-50 transition-colors ${
                       proposal.status === "selected" ? "bg-green-50" : ""
                     }`}
@@ -306,12 +420,35 @@ const ProposalsTable = ({ proposals, tenderInfo, onRefresh }) => {
                         >
                           {proposal.isActive ? "Desactivar" : "Activar"}
                         </button>
+                        {/* Ver detalle */}
+                        <button
+                          onClick={() => setExpandedId(expandedId === proposal.id ? null : proposal.id)}
+                          className="px-3 py-1 text-xs rounded-md border border-gray-300 text-gray-600 hover:bg-gray-100 transition-colors flex items-center gap-1"
+                        >
+                          {expandedId === proposal.id ? (
+                            <>
+                              <svg className="w-3 h-3" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M5 15l7-7 7 7" /></svg>
+                              Ocultar
+                            </>
+                          ) : (
+                            <>
+                              <svg className="w-3 h-3" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M19 9l-7 7-7-7" /></svg>
+                              Ver detalle
+                            </>
+                          )}
+                        </button>
                       </div>
                     </td>
                   </tr>
-                ))
-              )}
-            </tbody>
+                  {expandedId === proposal.id && (
+                    <tr>
+                      <td colSpan={7} className="p-0">
+                        <ProposalDetailPanel proposal={proposal} />
+                      </td>
+                    </tr>
+                  )}
+                  </tbody>
+                ))}
           </table>
         </div>
       </div>
