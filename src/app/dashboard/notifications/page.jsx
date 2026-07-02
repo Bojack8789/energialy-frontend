@@ -25,8 +25,7 @@ export default function NotificationsPage() {
   }, [filter, typeFilter]);
 
   const getAuthHeaders = () => {
-    const userData = getLocalStorage();
-    const token = userData?.accessToken;
+    const token = typeof window !== "undefined" ? sessionStorage.getItem("accessToken") : null;
     return {
       'Authorization': `Bearer ${token}`,
       'Content-Type': 'application/json'

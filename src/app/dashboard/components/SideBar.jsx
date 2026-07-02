@@ -12,6 +12,7 @@ import MenuItem from './MenuItem';
 import getLocalStorage from '../../Func/localStorage';
 import Loader from '@/app/components/Loader';
 import SubscriptionBadge from '@/app/components/SubscriptionBadge';
+import Notifications from '@/app/components/Notifications';
 import { menuBar } from '@/app/data/menu';
 import { bankAccountOpen } from '@/app/Func/controllers';
 
@@ -212,6 +213,13 @@ export default function SideBar() {
           {user?.company?.id && (
             <div style={{ minWidth: 0, flexShrink: 1, overflow: 'hidden' }}>
               <SubscriptionBadge companyId={user.company.id} />
+            </div>
+          )}
+
+          {/* Campanita de notificaciones */}
+          {user && (
+            <div style={{ flexShrink: 0 }}>
+              <Notifications />
             </div>
           )}
 

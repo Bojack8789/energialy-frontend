@@ -118,7 +118,9 @@ function TenderDetail({params}) {
     }
   };
 
-  console.log(user);
+  const fmtUSD = (n) =>
+    `USD ${Number(n || 0).toLocaleString('es-AR', { minimumFractionDigits: 0, maximumFractionDigits: 2 })}`;
+
   const renderDescription = () => {
     // Check if data.description is not empty
     return data?.description ? (
@@ -216,33 +218,14 @@ function TenderDetail({params}) {
               </div>
               <div className="p-6">
                 <div className="space-y-4">
-                  {(() => {
-                    console.log('🔍 DEBUG - Received Proposals:', receivedProposals.map(p => ({
-                      name: p.Company?.name,
-                      status: p.status,
-                      statusType: typeof p.status,
-                      statusLength: p.status?.length,
-                      statusCharCodes: p.status ? [...p.status].map(c => c.charCodeAt(0)) : null
-                    })));
-
-                    const sorted = [...receivedProposals].sort((a, b) => {
+                  {[...receivedProposals]
+                    .sort((a, b) => {
                       // Ordenar: seleccionada primero, luego preseleccionadas, luego enviadas, luego rechazadas
                       const statusOrder = { 'selected': 0, 'accepted': 0, 'preselected': 1, 'sent': 2, 'rejected': 3 };
-
-                      // Trim the status to remove any whitespace
-                      const statusA = (a.status || '').trim();
-                      const statusB = (b.status || '').trim();
-
-                      const orderA = statusOrder[statusA] !== undefined ? statusOrder[statusA] : 99;
-                      const orderB = statusOrder[statusB] !== undefined ? statusOrder[statusB] : 99;
-
-                      console.log(`Comparing ${a.Company?.name}(${statusA}="${orderA}") vs ${b.Company?.name}(${statusB}="${orderB}") = ${orderA - orderB}`);
+                      const orderA = statusOrder[(a.status || '').trim()] ?? 99;
+                      const orderB = statusOrder[(b.status || '').trim()] ?? 99;
                       return orderA - orderB;
-                    });
-
-                    console.log('✅ AFTER SORT:', sorted.map(p => ({ name: p.Company?.name, status: p.status })));
-                    return sorted;
-                  })()
+                    })
                     .map((proposal) => {
                       const isSelected = proposal.status === 'selected' || proposal.status === 'accepted';
                       return (
@@ -268,60 +251,6 @@ function TenderDetail({params}) {
                                 Ver Perfil
                               </button>
                             )}
-                          </div>
-                          <p className="text-gray-600 mt-2">{proposal.description}</p>
-                          <div className="mt-3 flex gap-4 text-sm">
-                            <span className="text-gray-700">
-                              <strong>Monto:</strong> ${proposal.totalAmount?.toLocaleString()}
-                            </span>
-                            <span className="text-gray-700">
-                              <strong>Duración:</strong> {proposal.projectDuration} días
-                            </span>
-                          </div>
-                          {/* Botón expandir detalles */}
-                          <button
-                            onClick={() => setExpandedProposalId(expandedProposalId === proposal.id ? null : proposal.id)}
-                            className="mt-2 text-xs text-secondary-600 underline"
-                          >
-                            {expandedProposalId === proposal.id ? '▲ Ocultar detalle' : '▼ Ver cotización de servicios'}
-                          </button>
-
-                          {/* Panel expandible */}
-                          {expandedProposalId === proposal.id && (
-                            <div className="mt-3 p-3 bg-gray-50 rounded-md border border-gray-200 text-sm space-y-3">
-                              {proposal.servicePriceQuotes?.length > 0 && (
-                                <div>
-                                  <p className="font-semibold text-gray-700 mb-2">Cotización de Servicios:</p>
-                                  <div className="grid grid-cols-3 gap-1 text-xs font-medium text-gray-500 mb-1">
-                                    <span>Servicio</span><span>Referencia</span><span>Cotizado</span>
-                                  </div>
-                                  {proposal.servicePriceQuotes.map((s, i) => (
-                                    <div key={i} className="grid grid-cols-3 gap-1 text-xs text-gray-700 py-1 border-t border-gray-100">
-                                      <span className="font-medium">{s.name}</span>
-                                      <span>U$D {s.referencePrice} / {s.priceType === 'per_day' ? 'día' : 'fijo'}</span>
-                                      <span className="font-semibold text-secondary-600">U$D {s.quotedPrice}</span>
-                                    </div>
-                                  ))}
-                                </div>
-                              )}
-                              {proposal.customFieldAnswers?.length > 0 && (
-                                <div>
-                                  <p className="font-semibold text-gray-700 mb-2">Respuestas a campos personalizados:</p>
-                                  {proposal.customFieldAnswers.map((f, i) => (
-                                    <div key={i} className="text-xs text-gray-700 py-1 border-t border-gray-100">
-                                      <span className="font-medium">{f.label}:</span> {f.value?.toString() || '—'}
-                                    </div>
-                                  ))}
-                                </div>
-                              )}
-                              {(!proposal.servicePriceQuotes?.length && !proposal.customFieldAnswers?.length) && (
-                                <p className="text-xs text-gray-500">Sin datos adicionales.</p>
-                              )}
-                            </div>
-                          )}
-
-                          {/* Badge de estado */}
-                          <div className="mt-2">
                             {proposal.status === 'sent' && (
                               <span className="inline-block rounded bg-blue-100 border border-blue-400 text-blue-700 px-3 py-1 text-xs font-medium uppercase">
                                 Enviada
@@ -343,6 +272,86 @@ function TenderDetail({params}) {
                               </span>
                             )}
                           </div>
+                          <p className="text-gray-600 mt-2">{proposal.description}</p>
+
+                          {/* Datos principales de la propuesta */}
+                          <div className="mt-3 grid grid-cols-2 sm:grid-cols-3 gap-3 rounded-md bg-gray-50 border border-gray-200 p-3 max-w-xl">
+                            <div>
+                              <p className="text-xs text-gray-500 uppercase tracking-wide">Monto total</p>
+                              <p className="text-lg font-bold text-secondary-600 whitespace-nowrap">{fmtUSD(proposal.totalAmount)}</p>
+                            </div>
+                            <div>
+                              <p className="text-xs text-gray-500 uppercase tracking-wide">Duración estimada</p>
+                              <p className="text-sm font-semibold text-gray-800 mt-1">{proposal.projectDuration || '—'}</p>
+                            </div>
+                            <div>
+                              <p className="text-xs text-gray-500 uppercase tracking-wide">Recibida</p>
+                              <p className="text-sm font-semibold text-gray-800 mt-1">
+                                {proposal.createdAt ? new Date(proposal.createdAt).toLocaleDateString('es-AR', { day: '2-digit', month: '2-digit', year: 'numeric' }) : '—'}
+                              </p>
+                            </div>
+                          </div>
+
+                          {/* Botón expandir detalles */}
+                          <button
+                            onClick={() => setExpandedProposalId(expandedProposalId === proposal.id ? null : proposal.id)}
+                            className="mt-3 inline-flex items-center gap-1 rounded border border-secondary-300 bg-white px-3 py-1.5 text-xs font-medium text-secondary-600 hover:bg-secondary-50 transition-colors"
+                          >
+                            {expandedProposalId === proposal.id
+                              ? '▲ Ocultar detalle'
+                              : `▼ Ver detalle de la cotización${proposal.servicePriceQuotes?.length ? ` (${proposal.servicePriceQuotes.length} ítem${proposal.servicePriceQuotes.length === 1 ? '' : 's'})` : ''}`}
+                          </button>
+
+                          {/* Panel expandible */}
+                          {expandedProposalId === proposal.id && (
+                            <div className="mt-3 p-4 bg-gray-50 rounded-md border border-gray-200 text-sm space-y-4">
+                              {proposal.servicePriceQuotes?.length > 0 && (
+                                <div className="overflow-x-auto">
+                                  <p className="font-semibold text-gray-700 mb-2">Cotización de servicios</p>
+                                  <table className="w-full text-xs">
+                                    <thead>
+                                      <tr className="text-gray-500 border-b border-gray-200">
+                                        <th className="text-left font-medium py-1.5 pr-2">Servicio</th>
+                                        <th className="text-right font-medium py-1.5 px-2 whitespace-nowrap">Precio ref.</th>
+                                        <th className="text-right font-medium py-1.5 pl-2 whitespace-nowrap">Cotizado</th>
+                                      </tr>
+                                    </thead>
+                                    <tbody>
+                                      {proposal.servicePriceQuotes.map((s, i) => (
+                                        <tr key={i} className="border-b border-gray-100 text-gray-700">
+                                          <td className="py-1.5 pr-2 font-medium">
+                                            {s.name}
+                                            {s.isExtra && <span className="ml-1 text-gray-400 font-normal">(adicional)</span>}
+                                          </td>
+                                          <td className="py-1.5 px-2 text-right whitespace-nowrap">
+                                            {s.referencePrice ? `${fmtUSD(s.referencePrice)} ${s.priceType === 'per_day' ? '/ día' : ''}` : '—'}
+                                          </td>
+                                          <td className="py-1.5 pl-2 text-right font-semibold text-secondary-600 whitespace-nowrap">{fmtUSD(s.quotedPrice)}</td>
+                                        </tr>
+                                      ))}
+                                      <tr className="text-gray-800">
+                                        <td className="py-2 pr-2 font-bold" colSpan={2}>Total</td>
+                                        <td className="py-2 pl-2 text-right font-bold text-secondary-600 whitespace-nowrap">{fmtUSD(proposal.totalAmount)}</td>
+                                      </tr>
+                                    </tbody>
+                                  </table>
+                                </div>
+                              )}
+                              {proposal.customFieldAnswers?.length > 0 && (
+                                <div>
+                                  <p className="font-semibold text-gray-700 mb-2">Respuestas a campos personalizados</p>
+                                  {proposal.customFieldAnswers.map((f, i) => (
+                                    <div key={i} className="text-xs text-gray-700 py-1.5 border-t border-gray-100 first:border-t-0">
+                                      <span className="font-medium">{f.label}:</span> {f.value?.toString() || '—'}
+                                    </div>
+                                  ))}
+                                </div>
+                              )}
+                              {(!proposal.servicePriceQuotes?.length && !proposal.customFieldAnswers?.length) && (
+                                <p className="text-xs text-gray-500">Sin datos adicionales.</p>
+                              )}
+                            </div>
+                          )}
                         </div>
                         <div className="ml-4 flex flex-col gap-2">
                           {/* Botones de acción */}
@@ -423,8 +432,8 @@ function TenderDetail({params}) {
                   {/* Información de la propuesta */}
                   {selectedProposal && (
                     <div className="bg-gray-50 rounded-lg p-4 mb-4 text-left">
-                      <p className="font-semibold text-gray-900">{selectedProposal.company?.name}</p>
-                      <p className="text-sm text-gray-600 mt-1">Monto: ${selectedProposal.totalAmount?.toLocaleString()}</p>
+                      <p className="font-semibold text-gray-900">{selectedProposal.company?.name || selectedProposal.Company?.name}</p>
+                      <p className="text-sm text-gray-600 mt-1">Monto: <span className="font-semibold">{fmtUSD(selectedProposal.totalAmount)}</span></p>
                       <p className="text-sm text-gray-600">Duración: {selectedProposal.projectDuration}</p>
                     </div>
                   )}

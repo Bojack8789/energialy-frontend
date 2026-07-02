@@ -4,13 +4,14 @@
 "use client";
 import React, { useState, useEffect } from "react";
 import { Montserrat } from "next/font/google";
+import { useRouter } from "next/navigation";
 import axios from "axios";
 import { urlProduction } from "@/app/data/dataGeneric";
-import getLocalStorage from "@/app/Func/localStorage";
 
 const montserrat = Montserrat({ subsets: ["latin"] });
 
 export default function Notifications() {
+  const router = useRouter();
   const [notifications, setNotifications] = useState([]);
   const [unreadCount, setUnreadCount] = useState(0);
   const [isLoading, setIsLoading] = useState(false);
@@ -18,14 +19,23 @@ export default function Notifications() {
   const [page, setPage] = useState(1);
   const [hasMore, setHasMore] = useState(true);
 
+  // Contador al montar + polling cada 60 segundos
   useEffect(() => {
-    fetchNotifications();
     fetchUnreadCount();
+    const interval = setInterval(fetchUnreadCount, 60000);
+    return () => clearInterval(interval);
   }, []);
 
+  // Refrescar la lista cada vez que se abre el dropdown
+  useEffect(() => {
+    if (showDropdown) {
+      fetchNotifications(1, true);
+      fetchUnreadCount();
+    }
+  }, [showDropdown]);
+
   const getAuthHeaders = () => {
-    const userData = getLocalStorage();
-    const token = userData?.accessToken;
+    const token = typeof window !== "undefined" ? sessionStorage.getItem("accessToken") : null;
     return {
       'Authorization': `Bearer ${token}`,
       'Content-Type': 'application/json'
@@ -112,6 +122,36 @@ export default function Notifications() {
   const loadMore = () => {
     if (hasMore && !isLoading) {
       fetchNotifications(page + 1, false);
+    }
+  };
+
+  // A dónde navega cada notificación según la entidad relacionada
+  const getNotificationLink = (notification) => {
+    const meta = notification.metadata || {};
+    switch (notification.relatedType) {
+      case 'tender':
+        return `/tenders/${meta.tenderId || notification.relatedId}`;
+      case 'proposal':
+        return meta.tenderId ? `/tenders/${meta.tenderId}` : '/dashboard/proposals';
+      case 'message':
+      case 'conversation':
+        return '/dashboard/inbox';
+      case 'bank_account':
+      case 'finance_product':
+        return '/dashboard/finanzas/solicitudes';
+      default:
+        return null;
+    }
+  };
+
+  const handleNotificationClick = (notification) => {
+    if (!notification.isRead) {
+      markAsRead(notification.id);
+    }
+    const link = getNotificationLink(notification);
+    if (link) {
+      setShowDropdown(false);
+      router.push(link);
     }
   };
 
@@ -228,7 +268,7 @@ export default function Notifications() {
                     className={`p-4 border-b border-gray-100 hover:bg-gray-50 cursor-pointer transition-colors ${
                       !notification.isRead ? 'bg-blue-50' : ''
                     }`}
-                    onClick={() => !notification.isRead && markAsRead(notification.id)}
+                    onClick={() => handleNotificationClick(notification)}
                   >
                     <div className="flex items-start gap-3">
                       <span className="text-2xl flex-shrink-0">
