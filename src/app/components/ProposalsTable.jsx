@@ -5,6 +5,25 @@ import { useUpdateProposalStatusMutation } from "../redux/services/ProposalApi";
 const fmt = (n) =>
   Number(n || 0).toLocaleString("es-AR", { minimumFractionDigits: 2, maximumFractionDigits: 2 });
 
+const FEE_SCALE = [
+  { max: 10000, fee: 2.5 },
+  { max: 50000, fee: 2.25 },
+  { max: 100000, fee: 2 },
+  { max: 250000, fee: 1.75 },
+  { max: 500000, fee: 1.5 },
+  { max: 1000000, fee: 1 },
+  { max: Infinity, fee: 0.5 },
+];
+
+const getPriceDiff = (referencePrice, quotedPrice) => {
+  const ref = parseFloat(referencePrice);
+  const quoted = parseFloat(quotedPrice);
+  if (!ref || !quoted || isNaN(ref) || isNaN(quoted)) return null;
+  const diff = quoted - ref;
+  const pct = (diff / ref) * 100;
+  return { diff, pct };
+};
+
 const ProposalDetailPanel = ({ proposal }) => {
   const quotes = proposal.servicePriceQuotes || [];
   const answers = proposal.customFieldAnswers || [];
@@ -32,23 +51,36 @@ const ProposalDetailPanel = ({ proposal }) => {
                   <th className="px-4 py-2 text-left text-xs text-gray-500 font-semibold">Tipo</th>
                   <th className="px-4 py-2 text-right text-xs text-gray-500 font-semibold">Ref. (USD)</th>
                   <th className="px-4 py-2 text-right text-xs text-gray-500 font-semibold">Cotizado (USD)</th>
+                  <th className="px-4 py-2 text-right text-xs text-gray-500 font-semibold">Diferencia</th>
                 </tr>
               </thead>
               <tbody className="divide-y divide-gray-100 bg-white">
-                {baseItems.map((q, i) => (
-                  <tr key={i}>
-                    <td className="px-4 py-2 font-medium text-gray-800">{q.name}</td>
-                    <td className="px-4 py-2 text-gray-500 text-xs">
-                      {q.priceType === "per_day" ? "Por día" : "Fijo"}
-                    </td>
-                    <td className="px-4 py-2 text-right text-gray-500">
-                      {q.referencePrice != null ? fmt(q.referencePrice) : "—"}
-                    </td>
-                    <td className="px-4 py-2 text-right font-semibold text-gray-900">
-                      {fmt(q.quotedPrice)}
-                    </td>
-                  </tr>
-                ))}
+                {baseItems.map((q, i) => {
+                  const priceDiff = getPriceDiff(q.referencePrice, q.quotedPrice);
+                  return (
+                    <tr key={i}>
+                      <td className="px-4 py-2 font-medium text-gray-800">{q.name}</td>
+                      <td className="px-4 py-2 text-gray-500 text-xs">
+                        {q.priceType === "per_day" ? "Por día" : "Fijo"}
+                      </td>
+                      <td className="px-4 py-2 text-right text-gray-500">
+                        {q.referencePrice != null ? fmt(q.referencePrice) : "—"}
+                      </td>
+                      <td className="px-4 py-2 text-right font-semibold text-gray-900">
+                        {fmt(q.quotedPrice)}
+                      </td>
+                      <td className="px-4 py-2 text-right">
+                        {priceDiff ? (
+                          <span className={`text-xs font-semibold ${priceDiff.diff <= 0 ? "text-green-600" : "text-red-500"}`}>
+                            {priceDiff.diff > 0 ? "+" : ""}{fmt(priceDiff.diff)} ({priceDiff.pct > 0 ? "+" : ""}{priceDiff.pct.toFixed(1)}%)
+                          </span>
+                        ) : (
+                          <span className="text-xs text-gray-300">—</span>
+                        )}
+                      </td>
+                    </tr>
+                  );
+                })}
                 {extraItems.map((q, i) => (
                   <tr key={`extra-${i}`} className="bg-blue-50/50">
                     <td className="px-4 py-2 font-medium text-blue-800">
@@ -60,12 +92,13 @@ const ProposalDetailPanel = ({ proposal }) => {
                     <td className="px-4 py-2 text-right font-semibold text-blue-700">
                       {fmt(q.quotedPrice)}
                     </td>
+                    <td className="px-4 py-2 text-right text-xs text-gray-300">—</td>
                   </tr>
                 ))}
               </tbody>
               <tfoot className="border-t border-gray-200 bg-gray-50">
                 <tr>
-                  <td colSpan={3} className="px-4 py-2 text-right text-sm font-semibold text-gray-700">
+                  <td colSpan={4} className="px-4 py-2 text-right text-sm font-semibold text-gray-700">
                     Total propuesto
                   </td>
                   <td className="px-4 py-2 text-right text-sm font-bold text-gray-900">
@@ -73,7 +106,7 @@ const ProposalDetailPanel = ({ proposal }) => {
                   </td>
                 </tr>
                 <tr>
-                  <td colSpan={3} className="px-4 py-1 text-right text-xs text-orange-600">
+                  <td colSpan={4} className="px-4 py-1 text-right text-xs text-orange-600">
                     Fee Energialy ({proposal.serviceFee}%)
                   </td>
                   <td className="px-4 py-1 text-right text-xs text-orange-600">
@@ -81,7 +114,7 @@ const ProposalDetailPanel = ({ proposal }) => {
                   </td>
                 </tr>
                 <tr>
-                  <td colSpan={3} className="px-4 py-2 text-right text-sm font-semibold text-green-700">
+                  <td colSpan={4} className="px-4 py-2 text-right text-sm font-semibold text-green-700">
                     A recibir
                   </td>
                   <td className="px-4 py-2 text-right text-sm font-bold text-green-700">
@@ -293,7 +326,39 @@ const ProposalsTable = ({ proposals, tenderInfo, onRefresh }) => {
                   Duración
                 </th>
                 <th className="px-6 py-4 text-left text-xs font-semibold text-gray-600 uppercase tracking-wider">
-                  Fee Energialy
+                  <span className="flex items-center gap-1">
+                    Fee Energialy
+                    <span className="relative group">
+                      <svg className="w-3.5 h-3.5 text-gray-400 cursor-help" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M13 16h-1v-4h-1m1-4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z" />
+                      </svg>
+                      <div className="hidden group-hover:block absolute left-0 top-full mt-2 w-72 bg-white border border-gray-200 rounded-lg shadow-lg p-3 z-20 text-left normal-case font-normal">
+                        <p className="text-xs font-semibold text-gray-700 mb-2">
+                          ¿Por qué se aplica esta comisión?
+                        </p>
+                        <p className="text-xs text-gray-500 mb-2">
+                          Energialy cobra una comisión por intermediar el pago de forma segura entre las empresas. El porcentaje baja a medida que el monto de la propuesta es mayor:
+                        </p>
+                        <table className="w-full text-xs">
+                          <tbody>
+                            {FEE_SCALE.map((tier, idx) => {
+                              const prevMax = idx === 0 ? 0 : FEE_SCALE[idx - 1].max;
+                              return (
+                                <tr key={idx} className="text-gray-500">
+                                  <td className="py-0.5">
+                                    {tier.max === Infinity
+                                      ? `Más de USD ${prevMax.toLocaleString()}`
+                                      : `Hasta USD ${tier.max.toLocaleString()}`}
+                                  </td>
+                                  <td className="py-0.5 text-right">{tier.fee}%</td>
+                                </tr>
+                              );
+                            })}
+                          </tbody>
+                        </table>
+                      </div>
+                    </span>
+                  </span>
                 </th>
                 <th className="px-6 py-4 text-left text-xs font-semibold text-gray-600 uppercase tracking-wider">
                   A Recibir
