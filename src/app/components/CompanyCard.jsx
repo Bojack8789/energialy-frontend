@@ -7,7 +7,16 @@ function CompanyCard(props) {
   const router = useRouter()
   return (
     <>
-      <div className="w-full h-[320px] flex flex-col rounded-md bg-white shadow-md hover:shadow-2xl transition-shadow duration-300 overflow-hidden">
+      <div
+        className={`relative w-full h-[320px] flex flex-col rounded-md bg-white shadow-md hover:shadow-2xl transition-shadow duration-300 overflow-hidden ${
+          props.isOwn ? "ring-2 ring-secondary-500" : ""
+        }`}
+      >
+        {props.isOwn && (
+          <span className="absolute top-2 right-2 z-[60] bg-secondary-500 text-white text-xs font-semibold px-3 py-1 rounded-full shadow-md">
+            Tu empresa
+          </span>
+        )}
         <div className="relative w-full h-1/2 -mb-[45px] rounded-tr-md rounded-tl-md overflow-hidden">
           {props.compBanner ? (
             <Image

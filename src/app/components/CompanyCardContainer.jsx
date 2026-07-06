@@ -16,11 +16,11 @@ function getCompanyId() {
 function CompanyCardContainer() {
   const [currentPage, setCurrentPage] = useState(1);
   const filterCompanies = useSelector((state) => state.company.filterCompanies);
-  // * SE OBTIENEN TODAS LA COMPAÑIAS MENOS A LA QUE EL USUARIO PERTENECE
+  // * LA EMPRESA DEL USUARIO SE MUESTRA PRIMERA Y DESTACADA
   const companyId = getCompanyId();
-  const filterCompanyById = filterCompanies.filter(function(el) {
-    return String(el.id) !== String(companyId);
-  })
+  const ownCompany = filterCompanies.find((el) => String(el.id) === String(companyId));
+  const otherCompanies = filterCompanies.filter((el) => String(el.id) !== String(companyId));
+  const filterCompanyById = ownCompany ? [ownCompany, ...otherCompanies] : otherCompanies;
 
   //console.log(PaginationComponent.perPage);
   //console.log(filterCompanies);
@@ -65,6 +65,7 @@ function CompanyCardContainer() {
                 compLogo={comp.profilePicture}
                 compName={comp.name}
                 compId={comp.id}
+                isOwn={String(comp.id) === String(companyId)}
               />
             ))
           ) : (
