@@ -79,7 +79,7 @@ const CardProposal = ({ item }) => {
             </button>
             <button
               type="button"
-              className="inline-block rounded bg-gray-600 px-4 pb-2 pt-2.5 text-xs font-medium uppercase leading-normal text-white transition duration-150 ease-in-out hover:bg-gray-700"
+              className="inline-block rounded !bg-gray-600 px-4 pb-2 pt-2.5 text-xs font-medium uppercase leading-normal text-white transition duration-150 ease-in-out hover:!bg-gray-700"
               onClick={() => setShowProfile(true)}
             >
               Ver Perfil
