@@ -56,7 +56,7 @@ const CardProposal = ({ item }) => {
               )}
               {item.serviceFee && (
                 <div className="mb-3">
-                  <p className="text-xs font-medium text-neutral-600 mb-1">Fee Energialy</p>
+                  <p className="text-xs font-medium text-neutral-600 mb-1">Energialy Fee</p>
                   <p className="text-sm text-neutral-800">{item.serviceFee}% (USD {item.serviceAmount?.toLocaleString()})</p>
                 </div>
               )}

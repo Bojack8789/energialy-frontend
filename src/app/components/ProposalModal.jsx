@@ -474,7 +474,7 @@ export function ProposalModal({ open, handleOpen, data }) {
                       </div>
                       <div className="relative flex justify-between items-center text-xs text-orange-600">
                         <span className="flex items-center gap-1">
-                          Fee Energialy ({feePercent}%)
+                          Energialy Fee ({feePercent}%)
                           <button
                             type="button"
                             onMouseEnter={() => setShowFeeInfo(true)}
@@ -489,10 +489,10 @@ export function ProposalModal({ open, handleOpen, data }) {
                           {showFeeInfo && (
                             <div className="absolute left-0 bottom-full mb-2 w-72 bg-white border border-gray-200 rounded-lg shadow-lg p-3 z-10 text-left normal-case">
                               <p className="text-xs font-semibold text-gray-700 mb-2">
-                                ¿Por qué se aplica esta comisión?
+                                Energialy Fee
                               </p>
                               <p className="text-xs text-gray-500 mb-2">
-                                Energialy cobra una comisión por intermediar el pago de forma segura entre las empresas. El porcentaje baja a medida que el monto de la propuesta es mayor:
+                                Comisión que abonarás a Energialy si tu propuesta es elegida. El porcentaje baja a medida que el monto de la propuesta es mayor:
                               </p>
                               <table className="w-full text-xs">
                                 <tbody>

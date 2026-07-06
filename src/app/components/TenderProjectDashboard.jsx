@@ -92,7 +92,7 @@ const TenderProjectDashboard = ({ tender, selectedProposal }) => {
               </p>
             </div>
             <div>
-              <p className="text-sm text-gray-500">Fee Energialy</p>
+              <p className="text-sm text-gray-500">Energialy Fee</p>
               <p className="text-md font-semibold text-gray-700">
                 {selectedProposal?.serviceFee}% (${selectedProposal?.serviceAmount?.toLocaleString()})
               </p>

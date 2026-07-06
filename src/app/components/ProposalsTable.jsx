@@ -107,7 +107,7 @@ const ProposalDetailPanel = ({ proposal }) => {
                 </tr>
                 <tr>
                   <td colSpan={4} className="px-4 py-1 text-right text-xs text-orange-600">
-                    Fee Energialy ({proposal.serviceFee}%)
+                    Energialy Fee ({proposal.serviceFee}%)
                   </td>
                   <td className="px-4 py-1 text-right text-xs text-orange-600">
                     − USD {fmt(proposal.serviceAmount)}
@@ -327,17 +327,17 @@ const ProposalsTable = ({ proposals, tenderInfo, onRefresh }) => {
                 </th>
                 <th className="px-6 py-4 text-left text-xs font-semibold text-gray-600 uppercase tracking-wider">
                   <span className="flex items-center gap-1">
-                    Fee Energialy
+                    Energialy Fee
                     <span className="relative group">
                       <svg className="w-3.5 h-3.5 text-gray-400 cursor-help" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                         <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M13 16h-1v-4h-1m1-4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z" />
                       </svg>
                       <div className="hidden group-hover:block absolute left-0 top-full mt-2 w-72 bg-white border border-gray-200 rounded-lg shadow-lg p-3 z-20 text-left normal-case font-normal">
                         <p className="text-xs font-semibold text-gray-700 mb-2">
-                          ¿Por qué se aplica esta comisión?
+                          Energialy Fee
                         </p>
                         <p className="text-xs text-gray-500 mb-2">
-                          Energialy cobra una comisión por intermediar el pago de forma segura entre las empresas. El porcentaje baja a medida que el monto de la propuesta es mayor:
+                          Comisión que abonará el proveedor a Energialy si su propuesta es elegida. El porcentaje baja a medida que el monto de la propuesta es mayor:
                         </p>
                         <table className="w-full text-xs">
                           <tbody>
