@@ -234,22 +234,22 @@ export default function Notifications() {
 
       {/* Notifications Dropdown */}
       {showDropdown && (
-        <div className="fixed inset-x-2 top-20 sm:absolute sm:inset-x-auto sm:right-0 sm:top-auto sm:mt-2 sm:w-96 bg-white rounded-lg shadow-lg border border-gray-200 z-50 max-h-96 overflow-hidden">
+        <div className="fixed inset-x-2 top-20 sm:absolute sm:inset-x-auto sm:right-0 sm:top-auto sm:mt-2 sm:w-96 bg-white rounded-lg shadow-lg border border-gray-200 z-50 max-h-[calc(100vh-6rem)] sm:max-h-[28rem] flex flex-col overflow-hidden">
           {/* Header */}
-          <div className="px-4 py-3 border-b border-gray-200 flex justify-between items-center">
+          <div className="px-4 py-3 border-b border-gray-200 flex justify-between items-center gap-2 flex-shrink-0">
             <h3 className="text-lg font-semibold text-gray-800">Notificaciones</h3>
             {unreadCount > 0 && (
               <button
                 onClick={markAllAsRead}
-                className="text-sm text-indigo-600 hover:text-indigo-800"
+                className="text-sm text-indigo-600 hover:text-indigo-800 text-right flex-shrink-0"
               >
-                Marcar todas como leídas
+                Marcar leídas
               </button>
             )}
           </div>
 
           {/* Notifications List */}
-          <div className="max-h-80 overflow-y-auto">
+          <div className="flex-1 min-h-0 overflow-y-auto">
             {isLoading && notifications.length === 0 ? (
               <div className="p-4 text-center text-gray-500">
                 <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-indigo-600 mx-auto mb-2"></div>
@@ -325,7 +325,7 @@ export default function Notifications() {
           </div>
 
           {/* Footer */}
-          <div className="px-4 py-3 border-t border-gray-200 bg-gray-50">
+          <div className="px-4 py-3 border-t border-gray-200 bg-gray-50 flex-shrink-0">
             <a
               href="/dashboard/notifications"
               className="text-sm text-indigo-600 hover:text-indigo-800"
